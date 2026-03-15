@@ -1,0 +1,15 @@
+{
+  "name": "ventureos",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "bun run --filter '@ventureos/server' dev & bun run --filter '@ventureos/dashboard' dev",
+    "build": "bun run --filter '*' build",
+    "test": "bun run --filter '*' test",
+    "type-check": "bun run --filter '*' type-check"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
