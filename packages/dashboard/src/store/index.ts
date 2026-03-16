@@ -15,6 +15,7 @@ interface VentureStore {
   codeChanges: CodeChange[];
   connected: boolean;
   selectedAgentId: string | null;
+  eventLog: VentureEvent[];
 
   setSnapshot: (snapshot: Snapshot) => void;
   addEvent: (event: VentureEvent) => void;
@@ -29,6 +30,7 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
   codeChanges: [],
   connected: false,
   selectedAgentId: null,
+  eventLog: [],
 
   setSnapshot: (snapshot) =>
     set({
@@ -40,6 +42,8 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
 
   addEvent: (event) => {
     const state = get();
+    // Append to event log for time-travel replay
+    state.eventLog.push(event);
 
     switch (event.type) {
       case 'agent/register': {

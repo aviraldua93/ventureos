@@ -7,6 +7,7 @@ import { TaskBoard } from './components/TaskBoard';
 import { CodeDiffView } from './components/CodeDiffView';
 import { AgentDetail } from './components/AgentDetail';
 import { DemoControls } from './components/DemoControls';
+import { VirtualOffice } from './components/VirtualOffice/VirtualOffice';
 import './App.css';
 import css from './App.module.css';
 
@@ -16,73 +17,108 @@ export default function App() {
   const eventCount = agents.length + tasks.length + messages.length + codeChanges.length;
 
   return (
-    <div className={css.app}>
-      {/* Header */}
+    <Tabs defaultValue="dashboard" className={css.app}>
+      {/* Header — Linear-style top bar with integrated navigation */}
       <header className={css.header}>
         <div className={css.headerLeft}>
-          <h1 className={css.headerTitle}>🚀 VentureOS</h1>
-          <span className={css.subtitle}>Mission Control for Agent Teams</span>
+          <div className={css.logoMark}>⚡</div>
+          <h1 className={css.headerTitle}>VentureOS</h1>
+          <span className={css.headerDivider} />
+          <span className={css.subtitle}>Mission Control</span>
         </div>
+
+        <div className={css.headerCenter}>
+          <TabsList className={css.navList}>
+            <TabsTrigger value="dashboard" className={css.navTrigger}>Dashboard</TabsTrigger>
+            <TabsTrigger value="office" className={css.navTrigger}>Virtual Office</TabsTrigger>
+            <TabsTrigger value="settings" className={css.navTrigger}>Settings</TabsTrigger>
+          </TabsList>
+        </div>
+
         <div className={css.headerRight}>
-          <span className={`${css.statusDot} ${connected ? css.connected : css.disconnected}`} />
-          <span className={css.statusText}>{connected ? 'Connected' : 'Disconnected'}</span>
+          <span className={`${css.connectionBadge} ${connected ? css.connected : css.disconnected}`}>
+            <span className={css.statusDot} />
+            {connected ? 'Live' : 'Offline'}
+          </span>
         </div>
       </header>
 
-      {/* Navigation Tabs */}
-      <Tabs defaultValue="dashboard" className={css.mainContent}>
-        <TabsList>
-          <TabsTrigger value="dashboard">📊 Dashboard</TabsTrigger>
-          <TabsTrigger value="office">🏢 Virtual Office</TabsTrigger>
-          <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
-        </TabsList>
+      {/* Dashboard tab */}
+      <TabsContent value="dashboard" className={css.tabContent}>
+        <div className={css.dashboardGrid}>
+          <aside className={css.panelLeft} data-testid="panel-left">
+            <OrgChart />
+          </aside>
+          <section className={css.panelCenter} data-testid="panel-center">
+            <MessageStream />
+            <TaskBoard />
+          </section>
+          <aside className={css.panelRight}>
+            <CodeDiffView />
+          </aside>
+        </div>
+      </TabsContent>
 
-        <TabsContent value="dashboard" style={{ flex: 1, overflow: 'hidden', padding: 0 }}>
-          <div className={css.dashboardGrid}>
-            <aside className={css.panelLeft} data-testid="panel-left">
-              <OrgChart />
-            </aside>
-            <section className={css.panelCenter} data-testid="panel-center">
-              <MessageStream />
-              <TaskBoard />
-            </section>
-            <aside className={css.panelRight}>
-              <CodeDiffView />
-            </aside>
-          </div>
-        </TabsContent>
+      {/* Virtual Office tab */}
+      <TabsContent value="office" className={css.tabContent}>
+        <VirtualOffice />
+      </TabsContent>
 
-        <TabsContent value="office" style={{ flex: 1, overflow: 'hidden', padding: 0 }}>
-          <div className={css.placeholderView}>
-            <span className={css.placeholderIcon}>🏢</span>
-            <p>Virtual Office — Coming in Phase 2</p>
+      {/* Settings tab */}
+      <TabsContent value="settings" className={css.tabContent}>
+        <div className={css.placeholderView}>
+          <div className={css.placeholderIcon}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
           </div>
-        </TabsContent>
-
-        <TabsContent value="settings" style={{ flex: 1, overflow: 'hidden', padding: 0 }}>
-          <div className={css.placeholderView}>
-            <span className={css.placeholderIcon}>⚙️</span>
-            <p>Settings — Coming in Phase 2</p>
-          </div>
-        </TabsContent>
-      </Tabs>
+          <p className={css.placeholderTitle}>Settings</p>
+          <p className={css.placeholderDesc}>Configuration panel coming in Phase 2</p>
+        </div>
+      </TabsContent>
 
       {/* Agent detail slide-out panel */}
       <AgentDetail />
 
-      {/* Demo controls bottom bar */}
+      {/* Demo controls */}
       <DemoControls />
 
-      {/* Status bar */}
+      {/* Status bar — VS Code style */}
       <footer className={css.statusBar} data-testid="status-bar">
-        <span>Agents: {agents.length}</span>
-        <span>Tasks: {tasks.length}</span>
-        <span>Messages: {messages.length}</span>
-        <span>Code Changes: {codeChanges.length}</span>
-        <span className={css.statusDivider}>|</span>
-        <span>Total Events: {eventCount}</span>
-        <span className={`${css.statusDotSmall} ${connected ? css.connected : css.disconnected}`} />
+        <div className={css.statusLeft}>
+          <span className={css.statusItem}>
+            <span className={css.statusLabel}>Agents</span>
+            <span className={css.statusValue}>{agents.length}</span>
+          </span>
+          <span className={css.statusSep} />
+          <span className={css.statusItem}>
+            <span className={css.statusLabel}>Tasks</span>
+            <span className={css.statusValue}>{tasks.length}</span>
+          </span>
+          <span className={css.statusSep} />
+          <span className={css.statusItem}>
+            <span className={css.statusLabel}>Messages</span>
+            <span className={css.statusValue}>{messages.length}</span>
+          </span>
+          <span className={css.statusSep} />
+          <span className={css.statusItem}>
+            <span className={css.statusLabel}>Diffs</span>
+            <span className={css.statusValue}>{codeChanges.length}</span>
+          </span>
+        </div>
+        <div className={css.statusRight}>
+          <span className={css.statusItem}>
+            <span className={css.statusLabel}>Events</span>
+            <span className={css.statusValue}>{eventCount}</span>
+          </span>
+          <span className={css.statusSep} />
+          <span className={`${css.statusDotSmall} ${connected ? css.connected : css.disconnected}`} />
+          <span className={css.statusConnectionLabel}>
+            {connected ? 'Connected' : 'Disconnected'}
+          </span>
+        </div>
       </footer>
-    </div>
+    </Tabs>
   );
 }
