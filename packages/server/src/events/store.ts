@@ -37,6 +37,10 @@ export class EventStore {
     };
   }
 
+  clear(): void {
+    this.events = [];
+  }
+
   get count(): number {
     return this.events.length;
   }

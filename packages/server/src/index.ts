@@ -2,6 +2,8 @@ import type { VentureEvent } from '@ventureos/shared';
 import { EventStore } from './events/store';
 import { Projections } from './events/projections';
 import { createRouter } from './http/routes';
+import { DemoEngine } from './demo/engine';
+import { demoScenario } from './demo/scenario';
 import {
   handleOpen,
   handleMessage,
@@ -14,7 +16,12 @@ const PORT = Number(process.env.PORT) || 3000;
 
 const store = new EventStore({ persist: false });
 const projections = new Projections(store);
-const router = createRouter(projections);
+
+// Initialize demo engine
+const demo = new DemoEngine(store);
+demo.loadScenario(demoScenario);
+
+const router = createRouter(projections, demo);
 
 // Broadcast new events to all WebSocket clients
 store.subscribe((event) => {
@@ -66,14 +73,6 @@ const server = Bun.serve<WSData>({
   },
 });
 
-console.log(`
-  ╔═══════════════════════════════════════╗
-  ║         🚀 VentureOS v0.1.0          ║
-  ║   Mission Control for Agent Teams     ║
-  ╠═══════════════════════════════════════╣
-  ║  HTTP:  http://localhost:${PORT}         ║
-  ║  WS:    ws://localhost:${PORT}/ws        ║
-  ╚═══════════════════════════════════════╝
-`);
+console.log('VentureOS v0.1.0 running on http://localhost:' + PORT);
 
-export { server, store, projections };
+export { server, store, projections, demo };
