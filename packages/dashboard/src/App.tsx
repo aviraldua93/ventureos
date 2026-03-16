@@ -2,6 +2,7 @@ import { useWebSocket } from './hooks/useWebSocket';
 import { useVentureStore } from './store';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui';
 import { OrgChart } from './components/OrgChart';
+import { AgentListPanel } from './components/AgentListPanel';
 import { MessageStream } from './components/MessageStream';
 import { TaskBoard } from './components/TaskBoard';
 import { CodeDiffView } from './components/CodeDiffView';
@@ -30,6 +31,7 @@ export default function App() {
         <div className={css.headerCenter}>
           <TabsList className={css.navList}>
             <TabsTrigger value="dashboard" className={css.navTrigger}>Dashboard</TabsTrigger>
+            <TabsTrigger value="org" className={css.navTrigger}>Org Chart</TabsTrigger>
             <TabsTrigger value="office" className={css.navTrigger}>Virtual Office</TabsTrigger>
             <TabsTrigger value="settings" className={css.navTrigger}>Settings</TabsTrigger>
           </TabsList>
@@ -47,7 +49,7 @@ export default function App() {
       <TabsContent value="dashboard" className={css.tabContent}>
         <div className={css.dashboardGrid}>
           <aside className={css.panelLeft} data-testid="panel-left">
-            <OrgChart />
+            <AgentListPanel />
           </aside>
           <section className={css.panelCenter} data-testid="panel-center">
             <MessageStream />
@@ -57,6 +59,11 @@ export default function App() {
             <CodeDiffView />
           </aside>
         </div>
+      </TabsContent>
+
+      {/* Org Chart tab — full-page org chart view */}
+      <TabsContent value="org" className={css.tabContent}>
+        <OrgChart />
       </TabsContent>
 
       {/* Virtual Office tab */}

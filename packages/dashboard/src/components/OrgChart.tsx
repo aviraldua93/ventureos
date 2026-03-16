@@ -1,13 +1,15 @@
-import { useMemo, useCallback } from 'react';
-import * as Collapsible from '@radix-ui/react-collapsible';
+import { useState, useMemo, useCallback } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import type { Agent } from '@ventureos/shared';
 import { useVentureStore } from '../store';
 import css from './OrgChart.module.css';
 
-/* ═══════════════════════════════════════
-   Utilities
-   ═══════════════════════════════════════ */
+const STATUS_META: Record<Agent['status'], { color: string; label: string }> = {
+  active: { color: 'var(--color-success)', label: 'Active' },
+  idle: { color: 'var(--color-warning)', label: 'Idle' },
+  error: { color: 'var(--color-error)', label: 'Error' },
+  offline: { color: 'var(--color-offline)', label: 'Offline' },
+};
 
 function timeAgo(ts: number): string {
   const diff = Math.max(0, Math.floor((Date.now() - ts) / 1000));
@@ -17,28 +19,16 @@ function timeAgo(ts: number): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-/* ═══════════════════════════════════════
-   Tree & Department Logic
-   ═══════════════════════════════════════ */
+function getInitials(name: string): string {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
 
 interface TreeNode {
   agent: Agent;
   children: TreeNode[];
 }
 
-interface Department {
-  head: Agent;
-  label: string;
-  accent: string;
-  members: Agent[];
-}
-
-interface OrgData {
-  leaders: Agent[];
-  departments: Department[];
-}
-
-function buildTree(agents: Agent[]): TreeNode[] {
+function buildForest(agents: Agent[]): TreeNode[] {
   const map = new Map<string, TreeNode>();
   for (const a of agents) map.set(a.id, { agent: a, children: [] });
   const roots: TreeNode[] = [];
@@ -51,222 +41,151 @@ function buildTree(agents: Agent[]): TreeNode[] {
   return roots;
 }
 
-function flattenTree(node: TreeNode): Agent[] {
-  const out: Agent[] = [];
-  for (const c of node.children) {
-    out.push(c.agent);
-    out.push(...flattenTree(c));
-  }
-  return out;
+function matchTree(node: TreeNode, q: string): TreeNode | null {
+  const hit =
+    node.agent.name.toLowerCase().includes(q) ||
+    node.agent.role.toLowerCase().includes(q);
+  if (hit) return node;
+  const kids = node.children
+    .map((c) => matchTree(c, q))
+    .filter(Boolean) as TreeNode[];
+  return kids.length ? { agent: node.agent, children: kids } : null;
 }
 
-function extractLabel(role: string): string {
-  let m = role.match(/VP\s+(?:of\s+)?(.+)/i);
-  if (m) return m[1].trim();
-  m = role.match(/(.+?)\s+(?:Lead|Head|Director)$/i);
-  if (m) return m[1].trim();
-  m = role.match(/(?:Lead|Head|Director)\s+(?:of\s+)?(.+)/i);
-  if (m) return m[1].trim();
-  return role;
-}
-
-const ACCENTS: Record<string, string> = {
-  engineer: 'var(--agent-color-1)',
-  quality:  'var(--agent-color-2)',
-  ai:       'var(--agent-color-5)',
-  llm:      'var(--agent-color-5)',
-  product:  'var(--agent-color-4)',
-  community:'var(--agent-color-3)',
-  playwright:'var(--agent-color-6)',
-  test:     'var(--agent-color-6)',
-};
-
-function accentFor(label: string): string {
-  const l = label.toLowerCase();
-  for (const [k, v] of Object.entries(ACCENTS)) {
-    if (l.includes(k)) return v;
-  }
-  return 'var(--color-text-muted)';
-}
-
-function isDeptHead(agent: Agent, hasChildren: boolean): boolean {
-  if (!hasChildren) return false;
-  const r = agent.role.toLowerCase();
-  return (
-    r.includes('vp') ||
-    r.includes('lead') ||
-    r.includes('head') ||
-    r.includes('director')
-  );
-}
-
-function organize(agents: Agent[]): OrgData {
-  const roots = buildTree(agents);
-  const leaders: Agent[] = [];
-  const departments: Department[] = [];
-
-  function walk(nodes: TreeNode[]) {
-    for (const n of nodes) {
-      if (isDeptHead(n.agent, n.children.length > 0)) {
-        const label = extractLabel(n.agent.role);
-        departments.push({
-          head: n.agent,
-          label,
-          accent: accentFor(label),
-          members: flattenTree(n),
-        });
-      } else if (n.children.length > 0) {
-        leaders.push(n.agent);
-        walk(n.children);
-      } else {
-        leaders.push(n.agent);
-      }
-    }
-  }
-
-  walk(roots);
-  return { leaders, departments };
-}
-
-/* ═══════════════════════════════════════
-   Sub-Components
-   ═══════════════════════════════════════ */
-
-function StatusDot({ status }: { status: string }) {
-  const cls =
-    status === 'active'
-      ? css.dotActive
-      : status === 'error'
-        ? css.dotError
-        : status === 'offline'
-          ? css.dotOffline
-          : css.dotIdle;
-  return <span className={`${css.dot} ${cls}`} />;
-}
-
-function ChevronDown({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-    >
-      <path
-        d="M3.5 5.25L7 8.75L10.5 5.25"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-interface CardProps {
-  agent: Agent;
-  isSelected: boolean;
-  onSelect: (id: string) => void;
-}
-
-function AgentCard({ agent, isSelected, onSelect }: CardProps) {
-  return (
-    <Tooltip.Root>
-      <Tooltip.Trigger asChild>
-        <button
-          className={`${css.card} ${isSelected ? css.cardActive : ''}`}
-          onClick={() => onSelect(agent.id)}
-        >
-          <StatusDot status={agent.status} />
-          <div className={css.cardBody}>
-            <span className={css.name}>{agent.name}</span>
-            <span className={css.role}>{agent.role}</span>
-            {agent.currentTask && (
-              <span className={css.task}>{agent.currentTask}</span>
-            )}
-          </div>
-        </button>
-      </Tooltip.Trigger>
-      <Tooltip.Portal>
-        <Tooltip.Content
-          className={css.tip}
-          side="right"
-          sideOffset={8}
-          align="start"
-        >
-          <p className={css.tipName}>{agent.name}</p>
-          <p className={css.tipRole}>{agent.role}</p>
-          {agent.currentTask && (
-            <div className={css.tipTask}>
-              <span className={css.tipLabel}>Current task</span>
-              {agent.currentTask}
-            </div>
-          )}
-          <p className={css.tipMeta}>
-            {agent.status} · {timeAgo(agent.lastHeartbeat)}
-            {agent.capabilities.length > 0 &&
-              ` · ${agent.capabilities.join(', ')}`}
-          </p>
-          <Tooltip.Arrow className={css.tipArrow} />
-        </Tooltip.Content>
-      </Tooltip.Portal>
-    </Tooltip.Root>
-  );
-}
-
-interface DeptProps {
-  dept: Department;
+interface NodeProps {
+  node: TreeNode;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  depth: number;
+  collapsedSet: Set<string>;
+  onToggle: (id: string) => void;
+  isLast: boolean;
 }
 
-function DeptSection({ dept, selectedId, onSelect }: DeptProps) {
+function OrgNode({
+  node, selectedId, onSelect, depth,
+  collapsedSet, onToggle, isLast,
+}: NodeProps) {
+  const { agent, children } = node;
+  const hasKids = children.length > 0;
+  const isOpen = !collapsedSet.has(agent.id);
+  const isSelected = agent.id === selectedId;
+  const meta = STATUS_META[agent.status];
+  const isRoot = depth === 0;
+
   return (
-    <Collapsible.Root defaultOpen className={css.dept}>
-      <Collapsible.Trigger className={css.deptTrigger}>
-        <span
-          className={css.deptBar}
-          style={{ background: dept.accent }}
-        />
-        <span className={css.deptLabel}>{dept.label}</span>
-        <span className={css.deptCount}>{1 + dept.members.length}</span>
-        <ChevronDown className={css.deptChevron} />
-      </Collapsible.Trigger>
-      <Collapsible.Content className={css.deptBody}>
-        <AgentCard
-          agent={dept.head}
-          isSelected={selectedId === dept.head.id}
-          onSelect={onSelect}
-        />
-        {dept.members.map((m) => (
-          <AgentCard
-            key={m.id}
-            agent={m}
-            isSelected={selectedId === m.id}
-            onSelect={onSelect}
-          />
-        ))}
-      </Collapsible.Content>
-    </Collapsible.Root>
+    <div
+      className={`${css.nodeWrap} ${isLast ? css.nodeWrapLast : ''}`}
+      data-depth={depth}
+    >
+      {!isRoot && <span className={css.lineH} />}
+
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button
+            className={`${css.card} ${isSelected ? css.cardSelected : ''} ${isRoot ? css.cardRoot : ''}`}
+            onClick={() => onSelect(agent.id)}
+          >
+            <div
+              className={css.avatar}
+              style={{ '--avatar-accent': meta.color } as React.CSSProperties}
+            >
+              {getInitials(agent.name)}
+              <span
+                className={`${css.statusDot} ${agent.status === 'active' ? css.statusPulse : ''}`}
+                style={{ background: meta.color }}
+              />
+            </div>
+
+            <div className={css.cardBody}>
+              <span className={css.name}>{agent.name}</span>
+              <span className={css.role}>{agent.role}</span>
+            </div>
+
+            {hasKids && (
+              <span
+                className={`${css.expandBtn} ${isOpen ? css.expandOpen : ''}`}
+                onClick={(e) => { e.stopPropagation(); onToggle(agent.id); }}
+                role="button"
+                tabIndex={-1}
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M3 4L5 6L7 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            )}
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content className={css.tip} side="right" sideOffset={8} align="start">
+            <p className={css.tipName}>{agent.name}</p>
+            <p className={css.tipRole}>{agent.role}</p>
+            {agent.currentTask && (
+              <div className={css.tipTask}>
+                <span className={css.tipLabel}>Current task</span>
+                {agent.currentTask}
+              </div>
+            )}
+            <p className={css.tipMeta}>
+              {meta.label} \u00B7 {timeAgo(agent.lastHeartbeat)}
+              {agent.capabilities.length > 0 && ` \u00B7 ${agent.capabilities.join(', ')}`}
+            </p>
+            <Tooltip.Arrow className={css.tipArrow} />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+
+      {hasKids && isOpen && (
+        <div className={css.subtree}>
+          <span className={css.lineV} />
+          {children.map((child, i) => (
+            <OrgNode
+              key={child.agent.id}
+              node={child}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              depth={depth + 1}
+              collapsedSet={collapsedSet}
+              onToggle={onToggle}
+              isLast={i === children.length - 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
-
-/* ═══════════════════════════════════════
-   Main Component
-   ═══════════════════════════════════════ */
 
 export function OrgChart() {
   const agents = useVentureStore((s) => s.agents);
   const selectedAgentId = useVentureStore((s) => s.selectedAgentId);
   const setSelectedAgentId = useVentureStore((s) => s.setSelectedAgentId);
 
-  const org = useMemo(() => organize(agents), [agents]);
+  const [query, setQuery] = useState('');
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  const handleSelect = useCallback(
+  const forest = useMemo(() => buildForest(agents), [agents]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return forest;
+    return forest.map((r) => matchTree(r, q)).filter(Boolean) as TreeNode[];
+  }, [forest, query]);
+
+  const toggle = useCallback((id: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
+
+  const select = useCallback(
     (id: string) => setSelectedAgentId(selectedAgentId === id ? null : id),
     [selectedAgentId, setSelectedAgentId],
   );
+
+  const totalActive = agents.filter(a => a.status === 'active').length;
 
   return (
     <Tooltip.Provider delayDuration={400} skipDelayDuration={100}>
@@ -274,35 +193,55 @@ export function OrgChart() {
         <header className={css.header}>
           <h2 className={css.title}>Org Chart</h2>
           {agents.length > 0 && (
-            <span className={css.badge}>{agents.length}</span>
+            <span className={css.badge}>
+              {totalActive}<span className={css.badgeSep}>/</span>{agents.length}
+            </span>
           )}
         </header>
 
+        <div className={css.searchBar}>
+          <svg className={css.searchIcon} width="13" height="13" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M6.5 1a5.5 5.5 0 014.383 8.823l3.896 3.9a.75.75 0 01-1.06 1.06l-3.9-3.896A5.5 5.5 0 116.5 1zM2 6.5a4.5 4.5 0 109 0 4.5 4.5 0 00-9 0z"
+              fill="currentColor"
+              fillRule="evenodd"
+            />
+          </svg>
+          <input
+            className={css.searchInput}
+            type="text"
+            placeholder="Filter agents..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            spellCheck={false}
+          />
+          {query && (
+            <button className={css.searchClear} onClick={() => setQuery('')} aria-label="Clear">
+              &times;
+            </button>
+          )}
+        </div>
+
         {agents.length === 0 ? (
           <div className={css.empty}>No agents connected</div>
+        ) : visible.length === 0 ? (
+          <div className={css.empty}>No matching agents</div>
         ) : (
           <div className={css.scroll}>
-            {org.leaders.length > 0 && (
-              <section className={css.leaders}>
-                {org.leaders.map((a) => (
-                  <AgentCard
-                    key={a.id}
-                    agent={a}
-                    isSelected={selectedAgentId === a.id}
-                    onSelect={handleSelect}
-                  />
-                ))}
-              </section>
-            )}
-
-            {org.departments.map((d) => (
-              <DeptSection
-                key={d.head.id}
-                dept={d}
-                selectedId={selectedAgentId}
-                onSelect={handleSelect}
-              />
-            ))}
+            <div className={css.tree}>
+              {visible.map((root, i) => (
+                <OrgNode
+                  key={root.agent.id}
+                  node={root}
+                  selectedId={selectedAgentId}
+                  onSelect={select}
+                  depth={0}
+                  collapsedSet={collapsed}
+                  onToggle={toggle}
+                  isLast={i === visible.length - 1}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

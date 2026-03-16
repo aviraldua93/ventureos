@@ -1,321 +1,420 @@
-/* ═══════════════════════════════════════════════════════
-   OrgChart — Professional redesign (Linear / Vercel style)
-   280px sidebar · department grouping · Radix Collapsible
-   ═══════════════════════════════════════════════════════ */
+/* ===================================================
+   OrgChart — Full-width professional tree layout
+   CEO at top, VPs below, ICs under VPs
+   Connecting lines via CSS pseudo-elements
+   =================================================== */
 
-/* ── Layout ── */
-
-.root {
-  height: 100%;
+/* -- Container ----------------------------------------- */
+.container {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
   font-family: var(--font-sans);
 }
 
-.header {
+/* -- Toolbar ------------------------------------------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
+  flex-shrink: 0;
+  gap: var(--space-4);
+}
+
+.toolbarLeft {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
 }
 
 .title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
   margin: 0;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .badge {
   font-size: 10px;
-  line-height: 18px;
-  padding: 0 6px;
+  font-weight: 500;
   color: var(--color-text-muted);
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
+  padding: 0 6px;
+  line-height: 18px;
+  height: 18px;
   font-family: var(--font-mono);
 }
 
-.empty {
-  flex: 1;
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.statPills {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.pillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* -- Search -------------------------------------------- */
+.searchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 8px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 200px;
+  height: 28px;
+  padding: 0 26px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.searchInput:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-muted);
+}
+
+.searchClear {
+  all: unset;
+  position: absolute;
+  right: 2px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
   color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border-radius: 4px;
 }
 
-/* ── Scrollable Area ── */
+.searchClear:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-elevated);
+}
 
-.scroll {
+/* -- Canvas (scrollable tree area) --------------------- */
+.canvas {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: var(--space-1) 0 var(--space-10);
+  overflow: auto;
+  padding: var(--space-6);
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-subtle) transparent;
 }
 
-.scroll::-webkit-scrollbar { width: 4px; }
-.scroll::-webkit-scrollbar-track { background: transparent; }
-.scroll::-webkit-scrollbar-thumb {
+.canvas::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.canvas::-webkit-scrollbar-thumb {
   background: var(--color-border-subtle);
-  border-radius: 2px;
-}
-.scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-default);
+  border-radius: 4px;
 }
 
-/* ── Leaders Section ── */
-
-.leaders {
-  padding-bottom: var(--space-1);
-  margin-bottom: var(--space-1);
-  border-bottom: 1px solid var(--color-border-subtle);
+.canvas::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* ── Agent Card ── */
-
-.card {
-  all: unset;
+/* -- Tree root ----------------------------------------- */
+.treeRoot {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 5px 12px;
-  margin: 0 4px;
-  border-radius: var(--radius-md);
+  justify-content: center;
+  gap: 48px;
+  min-width: min-content;
+}
+
+/* -- Node group (card + subtree) ----------------------- */
+.nodeGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* -- Card ---------------------------------------------- */
+.card {
+  width: 200px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 10px;
+  padding: 12px 14px;
   cursor: pointer;
-  transition: background 80ms ease;
-  width: calc(100% - 8px);
-  box-sizing: border-box;
+  user-select: none;
+  transition: all 150ms ease;
+  position: relative;
 }
 
 .card:hover {
-  background: var(--color-bg-elevated);
+  border-color: var(--color-border-default);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
 }
 
 .card:focus-visible {
-  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
-.cardActive {
-  background: var(--color-accent-muted) !important;
+.cardSelected {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent), 0 2px 12px rgba(99, 102, 241, 0.15);
 }
 
-/* ── Status Dot ── */
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
 
 .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
   flex-shrink: 0;
-  margin-top: 5px;
+  background: var(--dot-color);
 }
 
-.dotActive {
-  background: var(--color-success);
-  box-shadow: 0 0 4px rgba(61, 220, 132, 0.45);
+.dotPulse {
+  animation: cardPulse 2s ease-in-out infinite;
 }
 
-.dotIdle {
-  background: var(--color-offline);
+@keyframes cardPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--dot-color); }
+  50% { box-shadow: 0 0 5px 2px var(--dot-color); }
 }
 
-.dotError {
-  background: var(--color-error);
-  box-shadow: 0 0 4px rgba(255, 92, 92, 0.45);
+.statusText {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.dotOffline {
-  background: var(--color-offline);
-  opacity: 0.4;
-}
-
-/* ── Card Body ── */
-
-.cardBody {
-  min-width: 0;
-  flex: 1;
-}
-
-.name {
-  display: block;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+.cardName {
+  font-size: 13px;
+  font-weight: 600;
   color: var(--color-text-primary);
   line-height: 1.3;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.role {
-  display: block;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.task {
-  display: block;
-  font-size: var(--font-size-xs);
+.cardRole {
+  font-size: 11px;
   color: var(--color-text-secondary);
   line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 1px;
 }
 
-/* ── Department ── */
-
-.dept {
-  margin-top: 2px;
+.cardTask {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border-subtle);
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.deptTrigger {
+.collapseBtn {
   all: unset;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: 6px var(--space-3);
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: background 80ms ease;
-  user-select: none;
-}
-
-.deptTrigger:hover {
-  background: var(--color-bg-elevated);
-}
-
-.deptBar {
-  width: 3px;
-  height: 14px;
-  border-radius: 1.5px;
-  flex-shrink: 0;
-}
-
-.deptLabel {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.deptCount {
+  gap: 4px;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 4px;
   font-size: 10px;
   color: var(--color-text-muted);
-  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 150ms ease;
+  width: fit-content;
 }
 
-.deptChevron {
-  color: var(--color-text-muted);
-  flex-shrink: 0;
+.collapseBtn:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+}
+
+.chevronIcon {
   transition: transform 150ms ease;
 }
 
-.deptTrigger[data-state='closed'] .deptChevron {
+.chevronOpen {
+  /* default: points down — no rotation needed */
+}
+
+.chevronIcon:not(.chevronOpen) {
   transform: rotate(-90deg);
 }
 
-/* ── Collapsible Content ── */
+.teamCount {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
 
-.deptBody {
+/* -- Subtree & connecting lines ----------------------- */
+.subtree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   overflow: hidden;
 }
 
-.deptBody[data-state='open'] {
-  animation: collapseOpen 150ms ease-out;
+.connectorDown {
+  width: 2px;
+  height: 24px;
+  background: var(--color-border-default);
+  flex-shrink: 0;
+  opacity: 0.5;
 }
 
-.deptBody[data-state='closed'] {
-  animation: collapseClose 150ms ease-out;
+.childrenRow {
+  display: flex;
+  justify-content: center;
 }
 
-@keyframes collapseOpen {
-  from { height: 0; opacity: 0; }
-  to   { height: var(--radix-collapsible-content-height); opacity: 1; }
+.childBranch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 0 16px;
 }
 
-@keyframes collapseClose {
-  from { height: var(--radix-collapsible-content-height); opacity: 1; }
-  to   { height: 0; opacity: 0; }
+/* Horizontal line across sibling branches */
+.childBranch::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-border-default);
+  opacity: 0.5;
 }
 
-/* ── Tooltip ── */
-
-.tip {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  max-width: 260px;
-  box-shadow: var(--shadow-md);
-  z-index: var(--z-overlay);
-  animation: tipIn 100ms ease-out;
+.childBranch:first-child::before {
+  left: 50%;
 }
 
-@keyframes tipIn {
-  from { opacity: 0; transform: translateX(-3px); }
-  to   { opacity: 1; transform: translateX(0); }
+.childBranch:last-child::before {
+  right: 50%;
 }
 
-.tipName {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+.childBranch:only-child::before {
+  display: none;
 }
 
-.tipRole {
-  margin: 2px 0 0;
-  font-size: var(--font-size-xs);
+/* Vertical connector from horizontal line to child card */
+.connectorUp {
+  width: 2px;
+  height: 24px;
+  background: var(--color-border-default);
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+/* -- Empty state --------------------------------------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--space-1);
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 500;
   color: var(--color-text-secondary);
+  margin: 0;
 }
 
-.tipTask {
-  margin-top: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border-subtle);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-normal);
-  word-break: break-word;
-}
-
-.tipLabel {
-  display: block;
-  font-size: 10px;
-  font-weight: var(--font-weight-medium);
+.emptyDesc {
+  font-size: 12px;
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 2px;
+  margin: 0;
 }
 
-.tipMeta {
-  margin: var(--space-2) 0 0;
-  font-size: 10px;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  text-transform: capitalize;
-}
+/* -- Responsive ---------------------------------------- */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
 
-.tipArrow {
-  fill: var(--color-bg-elevated);
+  .statPills {
+    display: none;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+
+  .card {
+    width: 160px;
+    padding: 10px 12px;
+  }
+
+  .childBranch {
+    padding: 0 8px;
+  }
 }
