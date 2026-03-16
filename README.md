@@ -6,6 +6,8 @@
 
 VentureOS is an open-source, real-time dashboard for observing AI agent teams. Connect your agents, and watch them collaborate through a live org chart, message stream, code diff viewer, and task board.
 
+> **📦 Current status:** VentureOS ships with a built-in demo scenario — 98 events simulating a team of 5 AI agents building [ArchitectAI](https://github.com/aviraldua93/architect-ai). It's the fastest way to see what the platform does. In the future, real agents will connect via the MCP server and WebSocket. The API is already live — you can POST your own events to `/api/events` right now.
+
 ---
 
 ## 🚀 Quick Start
@@ -17,23 +19,38 @@ Get VentureOS running on your machine in under 2 minutes.
 - [Bun](https://bun.sh) v1.0+ (our runtime & package manager)
 - Node.js v18+ (for Vite dev server)
 
-### Install & Run (3 commands)
+### Install & Run
 
 ```bash
 git clone https://github.com/aviraldua93/ventureos.git
 cd ventureos
 bun install
+bun run dev
 ```
 
-### Start VentureOS
+That's it. `bun run dev` starts both the backend server and the dashboard in one terminal (with hot reload).
 
-You'll need **two terminal windows**:
+> **Backend:** You should see `VentureOS v0.1.0 running on http://localhost:3000`
+> **Dashboard:** You should see `VITE v6.x.x  ready in Xms` → `Local: http://localhost:5173`
+
+### Open Your Browser
+
+👉 **http://localhost:5173**
+
+Click **"Start Demo"** to launch the demo. This replays a pre-recorded scenario of 5 AI agents building ArchitectAI — you'll see them appear on the org chart, chat in the message stream, pick up tasks, and ship code changes. It runs ~98 events over about 30 seconds at default speed.
+
+<details>
+<summary><strong>🔧 Manual Setup (two terminals)</strong></summary>
+
+If you prefer running the server and dashboard separately (useful for debugging or tailing logs independently):
 
 ```bash
-# Terminal 1 — Backend server
+# Terminal 1 — Backend server (with hot reload)
 cd packages/server
-bun run build && bun run dist/index.js
+bun run dev
 ```
+
+> You should see: `VentureOS v0.1.0 running on http://localhost:3000`
 
 ```bash
 # Terminal 2 — Dashboard
@@ -41,13 +58,9 @@ cd packages/dashboard
 bun run dev
 ```
 
-> **💡 Shortcut:** From the project root, `bun run dev` starts both the server and dashboard at once.
+> You should see: `VITE v6.x.x  ready in Xms` → `Local: http://localhost:5173`
 
-### Open Your Browser
-
-👉 **http://localhost:5173**
-
-Click **"Start Demo"** to watch an AI agent team build ArchitectAI in real-time.
+</details>
 
 ---
 
@@ -123,6 +136,51 @@ bun run test
 
 # Production build
 bun run build
+```
+
+---
+
+## ❓ Troubleshooting
+
+**Port already in use (3000 or 5173)**
+
+```bash
+# PowerShell (Windows)
+Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process -Force
+Get-Process -Id (Get-NetTCPConnection -LocalPort 5173).OwningProcess | Stop-Process -Force
+
+# Mac / Linux
+lsof -ti:3000 | xargs kill -9
+lsof -ti:5173 | xargs kill -9
+```
+
+**`bun install` fails**
+
+esbuild's postinstall script can break on Windows. Try:
+
+```bash
+bun install --ignore-scripts
+bun install
+```
+
+**Dashboard shows a blank page**
+
+The dashboard proxies API calls to port 3000. Make sure the backend is running first — if it's not, the frontend has nothing to render.
+
+**Demo not starting**
+
+Test the API directly to rule out frontend issues:
+
+```bash
+curl -X POST http://localhost:3000/api/demo/start
+```
+
+**Type errors during build**
+
+Run the full type-check to see specific errors:
+
+```bash
+bun run type-check
 ```
 
 ---
