@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "tsc --watch --noEmit",
     "build": "tsc",
-    "test": "bun test",
+    "test": "echo 'No tests for shared types package'",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {

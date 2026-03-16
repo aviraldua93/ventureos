@@ -4,6 +4,7 @@ import { Projections } from './events/projections';
 import { createRouter } from './http/routes';
 import { DemoEngine } from './demo/engine';
 import { demoScenario } from './demo/scenario';
+import { logger } from './logger';
 import {
   handleOpen,
   handleMessage,
@@ -97,6 +98,6 @@ const server = Bun.serve<WSData>({
   },
 });
 
-console.log('VentureOS v0.1.0 running on http://localhost:' + PORT);
+logger.info({ port: PORT, version: '0.1.0' }, `VentureOS v0.1.0 running on http://localhost:${PORT}`);
 
 export { server, store, projections, demo };

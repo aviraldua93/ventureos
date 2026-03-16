@@ -1,5 +1,6 @@
 import type { ServerWebSocket } from 'bun';
 import type { WSMessage, VentureEvent, Snapshot } from '@ventureos/shared';
+import { logger } from '../logger';
 
 export interface WSData {
   id: string;
@@ -15,7 +16,7 @@ export function handleOpen(ws: ServerWebSocket<WSData>, snapshot: Snapshot): voi
   clients.add(ws);
   const msg: WSMessage = { type: 'snapshot', payload: snapshot };
   ws.sendText(JSON.stringify(msg));
-  console.log(`[ws] client connected (${clients.size} total)`);
+  logger.info({ clientCount: clients.size }, 'WebSocket client connected');
 }
 
 export function handleMessage(ws: ServerWebSocket<WSData>, message: string | Buffer): void {
@@ -31,7 +32,7 @@ export function handleMessage(ws: ServerWebSocket<WSData>, message: string | Buf
 
 export function handleClose(ws: ServerWebSocket<WSData>): void {
   clients.delete(ws);
-  console.log(`[ws] client disconnected (${clients.size} total)`);
+  logger.info({ clientCount: clients.size }, 'WebSocket client disconnected');
 }
 
 export function broadcastEvent(event: VentureEvent): void {

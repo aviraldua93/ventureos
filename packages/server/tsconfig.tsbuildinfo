@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/demo/engine.ts","./src/demo/scenario.ts","./src/events/projections.ts","./src/events/store.ts","./src/http/routes.ts","./src/ws/server.ts"],"errors":true,"version":"5.9.3"}
