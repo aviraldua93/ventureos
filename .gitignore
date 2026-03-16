@@ -29,3 +29,8 @@ bun.lockb
 
 # Event store persistence
 events.jsonl
+
+# Playwright
+test-results/
+playwright-report/
+e2e-results/

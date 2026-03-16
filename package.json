@@ -8,9 +8,11 @@
     "dev": "bun run --filter '@ventureos/server' dev & bun run --filter '@ventureos/dashboard' dev",
     "build": "bun run --filter '*' build",
     "test": "bun run --filter '*' test",
-    "type-check": "bun run --filter '*' type-check"
+    "type-check": "bun run --filter '*' type-check",
+    "test:e2e": "cd packages/dashboard && bunx playwright test --config e2e/playwright.config.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "picomatch": "^4.0.3",
     "typescript": "^5.7.0"
   }
