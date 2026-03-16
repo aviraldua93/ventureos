@@ -14,10 +14,12 @@ interface VentureStore {
   messages: Message[];
   codeChanges: CodeChange[];
   connected: boolean;
+  selectedAgentId: string | null;
 
   setSnapshot: (snapshot: Snapshot) => void;
   addEvent: (event: VentureEvent) => void;
   setConnected: (connected: boolean) => void;
+  setSelectedAgentId: (id: string | null) => void;
 }
 
 export const useVentureStore = create<VentureStore>((set, get) => ({
@@ -26,6 +28,7 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
   messages: [],
   codeChanges: [],
   connected: false,
+  selectedAgentId: null,
 
   setSnapshot: (snapshot) =>
     set({
@@ -147,4 +150,5 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
   },
 
   setConnected: (connected) => set({ connected }),
+  setSelectedAgentId: (id) => set({ selectedAgentId: id }),
 }));
