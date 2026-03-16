@@ -1,7 +1,6 @@
 import { useMemo, useCallback } from 'react';
 import type { Agent } from '@ventureos/shared';
 import { useVentureStore } from '../store';
-import { useUIStore } from '../store/uiStore';
 import css from './OrgChart.module.css';
 
 const STATUS_CLASS: Record<Agent['status'], string> = {
@@ -95,8 +94,8 @@ function AgentNode({ node, selectedId, onSelect }: AgentNodeProps) {
 
 export function OrgChart() {
   const agents = useVentureStore((s) => s.agents);
-  const selectedAgentId = useUIStore((s) => s.selectedAgentId);
-  const setSelectedAgentId = useUIStore((s) => s.setSelectedAgentId);
+  const selectedAgentId = useVentureStore((s) => s.selectedAgentId);
+  const setSelectedAgentId = useVentureStore((s) => s.setSelectedAgentId);
 
   const forest = useMemo(() => buildForest(agents), [agents]);
 
