@@ -20,49 +20,57 @@ export interface DemoStatus {
   liveMode: boolean;
 }
 
-// Expanded live messages — realistic ongoing team chatter with variety
+// ── Sprint Plan Tasks (real work, not gibberish) ────────────────
+
+const SPRINT_TASKS: Array<{ title: string; description: string; team: string[] }> = [
+  { title: 'Virtual Office sprite rendering', description: 'Canvas2D agent sprites with status glow and animations', team: ['mia-torres', 'ravi-patel', 'kenji-ohara'] },
+  { title: 'Agent pathfinding A*', description: 'Tile-based pathfinding for agent movement between rooms', team: ['zoe-chen', 'mia-chen'] },
+  { title: 'WebSocket event streaming', description: 'Real-time event push from server to dashboard clients', team: ['kai-nakamura', 'zoe-chen'] },
+  { title: 'Task board redesign', description: 'Kanban board with drag-drop and swimlanes by team', team: ['ravi-patel', 'lena-park'] },
+  { title: 'OrgChart component', description: 'Interactive org chart showing team hierarchy', team: ['devon-achebe', 'lena-park'] },
+  { title: 'Playwright E2E suite', description: 'End-to-end tests for all dashboard views', team: ['riley-nakamura', 'sam-okonkwo', 'casey-lin'] },
+  { title: 'Browser daemon prototype', description: 'Persistent Chromium instance for faster test runs', team: ['alex-petrov'] },
+  { title: 'Sprint burndown dashboard', description: 'Real-time sprint progress visualization', team: ['marc-delacroix', 'dana-whitfield'] },
+  { title: 'Agent emotion system', description: 'Map operational states to visual emotions in the office', team: ['mia-chen', 'kenji-ohara'] },
+  { title: 'Code diff view with Shiki', description: 'Syntax-highlighted code diffs in the dashboard', team: ['kai-nakamura', 'ravi-patel'] },
+  { title: 'CI pipeline optimization', description: 'Parallel test runs and caching for faster CI', team: ['marcus-webb'] },
+  { title: 'LLM streaming integration', description: 'Stream LLM responses with latency tracking', team: ['noor-abbasi', 'eli-vance'] },
+  { title: 'API documentation', description: 'Generate OpenAPI spec for all endpoints', team: ['jules-rivera', 'maya-patel'] },
+  { title: 'Community Discord bot', description: 'Bot for auto-posting release notes and updates', team: ['ava-chen', 'ren-kowalski'] },
+  { title: 'Phase 2 PRD', description: 'Product requirements for spectator mode and replay', team: ['iris-oduya', 'leo-tanaka'] },
+  { title: 'QA regression suite', description: 'Full regression testing before release', team: ['lex-morales', 'priya-desai', 'sam-torres'] },
+];
+
+// Messages that reference real work — each tied to an agent who actually does that work
 const LIVE_MESSAGES: Array<{ from: string; to?: string; content: string; messageType: 'chat' | 'task' | 'review' | 'blocker' }> = [
-  { from: 'priya-sharma', to: 'kai-nakamura', content: 'Can you review the latest API changes? I want to ship by EOD.', messageType: 'review' },
-  { from: 'kai-nakamura', content: 'Refactoring the authentication middleware — found a cleaner pattern.', messageType: 'task' },
-  { from: 'mia-torres', content: 'TypeScript strict mode is catching some edge cases we missed.', messageType: 'chat' },
-  { from: 'zoe-chen', to: 'mia-torres', content: 'Need help with the WebSocket reconnection logic.', messageType: 'blocker' },
-  { from: 'maya-patel', content: 'Documentation updated for the new CLI commands.', messageType: 'task' },
-  { from: 'jordan-park', content: 'Sprint velocity looking great — we\'re ahead of schedule.', messageType: 'chat' },
-  { from: 'kai-nakamura', to: 'zoe-chen', content: 'Your MCP transport implementation is solid. Approved with minor comments.', messageType: 'review' },
-  { from: 'ravi-patel', content: 'Optimized the event store queries — 3x faster now.', messageType: 'task' },
-  { from: 'zoe-chen', content: 'SSE correlation fix is working. Running integration tests.', messageType: 'task' },
-  { from: 'maya-patel', to: 'jordan-park', content: 'Should we add a FAQ section to the README?', messageType: 'chat' },
-  { from: 'jordan-park', content: 'All hands: great progress today. Let\'s keep this momentum.', messageType: 'chat' },
-  { from: 'kai-nakamura', content: 'Deployed canary build to staging. Monitoring metrics.', messageType: 'task' },
-  { from: 'mia-torres', to: 'kai-nakamura', content: 'Found a potential memory leak in the projection cache.', messageType: 'blocker' },
-  { from: 'zoe-chen', content: 'All transport tests passing. Moving to integration phase.', messageType: 'task' },
-  { from: 'maya-patel', content: 'Blog post draft ready for review: "Building with AI Agents"', messageType: 'review' },
-  { from: 'kai-nakamura', to: 'mia-torres', content: 'Good catch on the memory leak — can you file a task?', messageType: 'chat' },
-  { from: 'jordan-park', to: 'maya-patel', content: 'Yes, FAQ would be great. Add common setup issues.', messageType: 'chat' },
-  { from: 'mia-torres', content: 'Implemented connection pooling for better throughput.', messageType: 'task' },
-  { from: 'zoe-chen', to: 'kai-nakamura', content: 'Merging the MCP branch now. Tests are green.', messageType: 'task' },
-  { from: 'maya-patel', content: 'Added interactive examples to the getting started guide.', messageType: 'task' },
-  // New expanded messages for more variety
-  { from: 'sana-okafor', content: 'Architecture review scheduled for 3pm. All leads please join.', messageType: 'chat' },
-  { from: 'marcus-webb', content: 'CI pipeline green across all branches. Deploying to staging.', messageType: 'task' },
-  { from: 'lex-morales', to: 'priya-desai', content: 'Run the full regression suite before we tag the release.', messageType: 'task' },
-  { from: 'noor-abbasi', content: 'LLM latency down 40% after switching to streaming responses.', messageType: 'task' },
-  { from: 'eli-vance', content: 'Agent orchestration layer handling 50 concurrent sessions now.', messageType: 'task' },
-  { from: 'jules-rivera', content: 'Tutorial video scripts are done. Recording tomorrow.', messageType: 'task' },
-  { from: 'ren-kowalski', content: 'DevRel demo went great — 200+ live viewers!', messageType: 'chat' },
+  { from: 'mia-torres', content: 'Sprite rendering pass complete — status glows are in.', messageType: 'task' },
+  { from: 'zoe-chen', to: 'mia-torres', content: 'A* pathfinding is finding routes across all rooms now.', messageType: 'task' },
+  { from: 'kai-nakamura', content: 'WebSocket reconnection with backoff is solid. Tested under load.', messageType: 'task' },
+  { from: 'ravi-patel', content: 'Task board drag-drop feels smooth. Swimlanes by team next.', messageType: 'task' },
+  { from: 'riley-nakamura', content: 'Playwright suite at 12 tests. Adding Virtual Office coverage.', messageType: 'task' },
+  { from: 'sam-okonkwo', to: 'riley-nakamura', content: 'E2E for OrgChart is green. Moving to TaskBoard.', messageType: 'task' },
+  { from: 'casey-lin', content: 'CodeDiffView E2E tests captured. Shiki highlighting verified.', messageType: 'task' },
+  { from: 'alex-petrov', content: 'Chromium daemon boots in <200ms now. Huge E2E speedup.', messageType: 'task' },
+  { from: 'marcus-webb', content: 'CI pipeline green across all packages. Build time down 40%.', messageType: 'task' },
+  { from: 'noor-abbasi', content: 'LLM streaming latency down to 80ms p50. Good enough for demo.', messageType: 'task' },
+  { from: 'eli-vance', content: 'Agent orchestration handling 50 concurrent sessions.', messageType: 'task' },
+  { from: 'jordan-park', content: 'Sprint velocity is 🔥 this week. Ship it.', messageType: 'chat' },
+  { from: 'sana-okafor', content: 'All servers verified. Backend 3000, dashboard 5173.', messageType: 'chat' },
   { from: 'dana-whitfield', content: 'Sprint burndown on track. No blockers in standup.', messageType: 'chat' },
-  { from: 'marc-delacroix', to: 'sana-okafor', content: 'Can we get the design tokens finalized by Thursday?', messageType: 'review' },
-  { from: 'iris-oduya', content: 'PRD for Phase 2 features is ready for review.', messageType: 'review' },
-  { from: 'sana-matsuda', content: 'New component library patterns pushed to Figma.', messageType: 'task' },
-  { from: 'priya-desai', content: 'Found 3 edge cases in the event replay. Filing bugs.', messageType: 'blocker' },
+  { from: 'marc-delacroix', to: 'sana-okafor', content: 'Can we finalize the design tokens by Thursday?', messageType: 'review' },
+  { from: 'iris-oduya', content: 'Phase 2 PRD ready for review. Spectator mode scoped.', messageType: 'review' },
+  { from: 'leo-tanaka', content: 'Cross-team dependencies mapped. No conflicts.', messageType: 'chat' },
+  { from: 'lex-morales', to: 'priya-desai', content: 'Run the full regression before we tag the release.', messageType: 'task' },
+  { from: 'priya-desai', content: 'Found 3 edge cases in event replay. Filing bugs.', messageType: 'blocker' },
   { from: 'sam-torres', content: 'Integration tests all passing. E2E coverage at 94%.', messageType: 'task' },
-  { from: 'leo-tanaka', content: 'Cross-team sync: ArchitectAI integration on schedule.', messageType: 'chat' },
   { from: 'ava-chen', content: 'Community Discord hit 5K members! 🎉', messageType: 'chat' },
-  { from: 'max', content: 'Portfolio metrics look strong. VentureOS leading velocity.', messageType: 'chat' },
-  { from: 'niko-reyes', content: 'Scouted 3 new potential integrations this week.', messageType: 'task' },
-  { from: 'mia-torres', to: 'ravi-patel', content: 'Your PR for the new tooltip component looks great. Approving.', messageType: 'review' },
-  { from: 'ravi-patel', content: 'Refactored the entire form validation layer. Much cleaner now.', messageType: 'task' },
-  { from: 'zoe-chen', content: 'Hot module reload is now sub-100ms. DX win.', messageType: 'task' },
+  { from: 'jules-rivera', content: 'API docs generated. Adding interactive examples.', messageType: 'task' },
+  { from: 'ren-kowalski', content: 'DevRel demo went great — 200+ live viewers.', messageType: 'chat' },
+  { from: 'maya-patel', content: 'Getting started guide updated with orchestration bridge docs.', messageType: 'task' },
+  { from: 'max', content: 'Portfolio metrics strong. VentureOS leading velocity.', messageType: 'chat' },
+  { from: 'niko-reyes', content: 'Scouted 3 integration partners this week.', messageType: 'task' },
+  { from: 'priya-sharma', to: 'kai-nakamura', content: 'Can you review the API changes? Want to ship EOD.', messageType: 'review' },
+  { from: 'mia-torres', to: 'ravi-patel', content: 'Your tooltip PR looks great. Approving.', messageType: 'review' },
 ];
 
 const LIVE_CODE_CHANGES: Array<{ agentId: string; filePath: string; diff: string; description: string }> = [
@@ -74,7 +82,6 @@ const LIVE_CODE_CHANGES: Array<{ agentId: string; filePath: string; diff: string
   { agentId: 'zoe-chen', filePath: 'src/mcp/session.ts', diff: '+  correlationId: crypto.randomUUID(),', description: 'Add correlation IDs for SSE tracking' },
   { agentId: 'kai-nakamura', filePath: 'src/api/routes.ts', diff: '+  app.get("/health", (req, res) => res.json({ ok: true, uptime: process.uptime() }));', description: 'Enhance health endpoint with uptime' },
   { agentId: 'mia-torres', filePath: 'src/core/store.ts', diff: '+  async batchAppend(events: Event[]) {\n+    for (const e of events) await this.append(e);\n+  }', description: 'Add batch event appending' },
-  // New expanded code changes
   { agentId: 'ravi-patel', filePath: 'src/components/AgentCard.tsx', diff: '+  const emotionIcon = getEmotionIcon(agent.emotion);\n+  return <span className={css.emotion}>{emotionIcon}</span>;', description: 'Add emotion indicators to agent cards' },
   { agentId: 'mia-torres', filePath: 'src/hooks/useTheme.ts', diff: '+  const [theme, setTheme] = useState<Theme>("dark");\n+  useEffect(() => document.body.dataset.theme = theme, [theme]);', description: 'Implement theme switching hook' },
   { agentId: 'kai-nakamura', filePath: 'src/api/ws-handler.ts', diff: '+  if (msg.type === "spectator:join") {\n+    ws.subscribe("spectator");\n+    ws.send(JSON.stringify(snapshot));\n+  }', description: 'Add spectator mode WebSocket handler' },
@@ -111,16 +118,15 @@ const AGENTS = [
   'sana-matsuda', 'max', 'niko-reyes', 'priya-sharma',
 ];
 
-const STATUSES: Array<'active' | 'idle' | 'error'> = ['active', 'active', 'active', 'idle', 'idle', 'error'];
 const TASK_STATUSES: Array<'backlog' | 'in_progress' | 'review' | 'done'> = ['backlog', 'in_progress', 'review', 'done'];
 
-// Dynamic content generators for truly varied events
+// Dynamic content generators — only used for active agents
 const DYNAMIC_CHAT_TEMPLATES = [
-  (from: string) => `Just pushed a commit to fix the ${pick(['flaky test', 'CSS layout issue', 'type error', 'race condition', 'null pointer'])}.`,
-  (from: string) => `${pick(['Great standup today!', 'Loved the demo.', 'Really clean PR.', 'Nice refactor!', 'This architecture is 🔥'])}`,
-  (from: string) => `Working on ${pick(['the dashboard', 'agent sync', 'event replay', 'the API layer', 'documentation', 'the CLI'])} — ETA ${pick(['30 min', '1 hour', 'end of day', 'tomorrow morning'])}.`,
-  (from: string) => `${pick(['Anyone seen this before?', 'Quick question:', 'FYI:', 'Heads up:', 'Update:'])} ${pick(['the tests are flaky in CI', 'I found a workaround', 'staging is back up', 'the feature flag is live', 'metrics look good'])}`,
-  (from: string) => `${pick(['Reviewing', 'Looking at', 'Debugging', 'Optimizing', 'Refactoring'])} the ${pick(['WebSocket handler', 'event store', 'projection engine', 'task board', 'org chart', 'virtual office'])}`,
+  (_from: string) => `Just pushed a commit to fix the ${pick(['flaky test', 'CSS layout issue', 'type error', 'race condition', 'null pointer'])}.`,
+  (_from: string) => `${pick(['Great standup today!', 'Loved the demo.', 'Really clean PR.', 'Nice refactor!', 'This architecture is 🔥'])}`,
+  (_from: string) => `Working on ${pick(['the dashboard', 'agent sync', 'event replay', 'the API layer', 'documentation', 'the CLI'])} — ETA ${pick(['30 min', '1 hour', 'end of day', 'tomorrow morning'])}.`,
+  (_from: string) => `${pick(['Anyone seen this before?', 'Quick question:', 'FYI:', 'Heads up:', 'Update:'])} ${pick(['the tests are flaky in CI', 'I found a workaround', 'staging is back up', 'the feature flag is live', 'metrics look good'])}`,
+  (_from: string) => `${pick(['Reviewing', 'Looking at', 'Debugging', 'Optimizing', 'Refactoring'])} the ${pick(['WebSocket handler', 'event store', 'projection engine', 'task board', 'org chart', 'virtual office'])}`,
 ];
 
 function pick<T>(arr: T[]): T {
@@ -145,9 +151,54 @@ export class DemoEngine {
   private liveCodeIdx = 0;
   private liveTaskCounter = 0;
   private eventCounter = 0;
+  private sprintTaskIdx = 0;
+
+  // Agent state tracking — the simulation respects real agent states
+  private agentStates = new Map<string, 'active' | 'idle' | 'error' | 'offline'>();
+  private agentTasks = new Map<string, string>();
 
   constructor(store: EventStore) {
     this.store = store;
+
+    // Listen for real events pushed via API to track agent states
+    store.subscribe((event) => {
+      if (event.type === 'agent/heartbeat') {
+        this.agentStates.set(event.data.agentId, event.data.status);
+        if (event.data.currentTask) {
+          this.agentTasks.set(event.data.agentId, event.data.currentTask);
+        } else if (event.data.status === 'idle') {
+          this.agentTasks.delete(event.data.agentId);
+        }
+      } else if (event.type === 'agent/register') {
+        // New agents start idle unless explicitly activated
+        if (!this.agentStates.has(event.data.agentId)) {
+          this.agentStates.set(event.data.agentId, 'idle');
+        }
+      }
+    });
+  }
+
+  /** Get agents that are currently active (deployed for real work) */
+  private getActiveAgents(): string[] {
+    const active: string[] = [];
+    for (const [id, status] of this.agentStates) {
+      if (status === 'active') active.push(id);
+    }
+    return active;
+  }
+
+  /** Get agents that are currently idle */
+  private getIdleAgents(): string[] {
+    const idle: string[] = [];
+    for (const [id, status] of this.agentStates) {
+      if (status === 'idle') idle.push(id);
+    }
+    return idle;
+  }
+
+  /** Check if an agent is deployed (active) */
+  private isActive(agentId: string): boolean {
+    return this.agentStates.get(agentId) === 'active';
   }
 
   loadScenario(scenario: DemoEvent[]): void {
@@ -164,6 +215,8 @@ export class DemoEngine {
     this.store.clear();
     this.liveMode = false;
     this.eventCounter = 0;
+    this.agentStates.clear();
+    this.agentTasks.clear();
     this.stopLive();
     this.scheduleNext();
   }
@@ -219,6 +272,9 @@ export class DemoEngine {
     this.liveCodeIdx = 0;
     this.liveTaskCounter = 0;
     this.eventCounter = 0;
+    this.sprintTaskIdx = 0;
+    this.agentStates.clear();
+    this.agentTasks.clear();
     this.running = true;
     this.paused = false;
     this.scheduleNext();
@@ -287,8 +343,13 @@ export class DemoEngine {
   private scheduleLiveEvent(): void {
     if (!this.running || this.paused || !this.liveMode) return;
 
-    // Varied delay: 1-5 seconds for more lively feel, scaled by speed
-    const delay = (1000 + Math.random() * 4000) / this.speed;
+    const activeAgents = this.getActiveAgents();
+    // If agents are deployed, generate events faster for a lively feel
+    // If nobody is active, slow down to ambient pace
+    const baseDelay = activeAgents.length > 0
+      ? (1000 + Math.random() * 3000)
+      : (3000 + Math.random() * 5000);
+    const delay = baseDelay / this.speed;
 
     this.liveTimer = setTimeout(async () => {
       if (!this.running || this.paused) return;
@@ -301,67 +362,146 @@ export class DemoEngine {
     }, delay);
   }
 
-  private generateLiveEvent(): VentureEvent {
+  private generateLiveEvent(): VentureEvent | null {
     const now = Date.now();
     const roll = Math.random();
     this.eventCounter++;
 
+    const activeAgents = this.getActiveAgents();
+    const hasActiveAgents = activeAgents.length > 0;
+
     if (roll < 0.30) {
-      // Heartbeat — agents change status dynamically
-      const agentId = pickAgent();
-      const status = pick(STATUSES);
+      // Heartbeat — only update active agents with task progress
+      // Don't randomly flip idle agents to active (that's the orchestration bridge's job)
+      if (!hasActiveAgents) {
+        // No active agents: skip heartbeat or emit ambient idle heartbeats
+        if (Math.random() < 0.3) {
+          const allRegistered = Array.from(this.agentStates.keys());
+          if (allRegistered.length > 0) {
+            const agentId = pick(allRegistered);
+            return {
+              type: 'agent/heartbeat',
+              timestamp: now,
+              data: {
+                agentId,
+                status: this.agentStates.get(agentId) || 'idle',
+              },
+            };
+          }
+        }
+        return null;
+      }
+
+      // Active agents: refresh their status with their real task
+      const agentId = pick(activeAgents);
+      const currentTask = this.agentTasks.get(agentId);
       return {
         type: 'agent/heartbeat',
         timestamp: now,
         data: {
           agentId,
-          status,
-          currentTask: status === 'active' ? pick(TASK_POOL).title : undefined,
+          status: 'active',
+          currentTask: currentTask || pick(TASK_POOL).title,
         },
       };
     } else if (roll < 0.55) {
-      // Message — mix of pool and dynamic templates
-      if (Math.random() < 0.4) {
-        // Dynamic generated message
-        const from = pickAgent();
-        const template = pick(DYNAMIC_CHAT_TEMPLATES);
-        const content = template(from);
-        const hasRecipient = Math.random() < 0.3;
-        let to: string | undefined;
-        if (hasRecipient) {
-          to = pickAgent();
-          if (to === from) to = undefined;
+      // Messages — active agents generate task messages, idle agents can chat
+      if (hasActiveAgents && Math.random() < 0.7) {
+        // Active agent work message
+        const from = pick(activeAgents);
+        const task = this.agentTasks.get(from);
+
+        // Find a message from this agent if one exists
+        const agentMessages = LIVE_MESSAGES.filter(m => m.from === from);
+        if (agentMessages.length > 0) {
+          const msg = pick(agentMessages);
+          return { type: 'agent/message', timestamp: now, data: { ...msg } };
         }
-        const messageType = pick(['chat', 'chat', 'task', 'review'] as const);
+
+        // Otherwise generate a dynamic message about their task
+        const content = task
+          ? `Working on: ${task}`
+          : pick(DYNAMIC_CHAT_TEMPLATES)(from);
         return {
           type: 'agent/message',
           timestamp: now,
-          data: { from, to, content, messageType },
+          data: { from, content, messageType: 'task' as const },
         };
       }
-      // Pool message
+
+      // Pool message from any registered agent
       const msg = LIVE_MESSAGES[this.liveMsgIdx % LIVE_MESSAGES.length];
       this.liveMsgIdx++;
+
+      // Only send if the sender is registered and not offline
+      const senderState = this.agentStates.get(msg.from);
+      if (senderState && senderState !== 'offline') {
+        return { type: 'agent/message', timestamp: now, data: { ...msg } };
+      }
+
+      // Fallback: dynamic message from a random active or idle agent
+      const anyAgent = hasActiveAgents ? pick(activeAgents) : pickAgent();
+      const template = pick(DYNAMIC_CHAT_TEMPLATES);
       return {
         type: 'agent/message',
         timestamp: now,
-        data: { ...msg },
+        data: { from: anyAgent, content: template(anyAgent), messageType: 'chat' as const },
       };
     } else if (roll < 0.75) {
-      // Code change
+      // Code change — only from active agents
+      if (!hasActiveAgents) {
+        // No active agents: use pool but only if the agent is registered
+        const change = LIVE_CODE_CHANGES[this.liveCodeIdx % LIVE_CODE_CHANGES.length];
+        this.liveCodeIdx++;
+        const agentState = this.agentStates.get(change.agentId);
+        if (agentState === 'active') {
+          return { type: 'agent/code_change', timestamp: now, data: { ...change } };
+        }
+        return null; // Skip code changes when nobody is working
+      }
+
+      // Prefer code changes from active agents
+      const activeCodeChanges = LIVE_CODE_CHANGES.filter(c => activeAgents.includes(c.agentId));
+      if (activeCodeChanges.length > 0) {
+        const change = pick(activeCodeChanges);
+        return { type: 'agent/code_change', timestamp: now, data: { ...change } };
+      }
+
+      // Fallback to pool
       const change = LIVE_CODE_CHANGES[this.liveCodeIdx % LIVE_CODE_CHANGES.length];
       this.liveCodeIdx++;
-      return {
-        type: 'agent/code_change',
-        timestamp: now,
-        data: { ...change },
-      };
+      return { type: 'agent/code_change', timestamp: now, data: { ...change } };
     } else {
-      // Task update — realistic task lifecycle
+      // Task update — use real sprint tasks, assign to active agents
+      if (hasActiveAgents) {
+        // Pick a sprint task that involves an active agent
+        const sprintTask = SPRINT_TASKS[this.sprintTaskIdx % SPRINT_TASKS.length];
+        this.sprintTaskIdx++;
+        const taskId = `sprint-task-${this.liveTaskCounter++}`;
+
+        // Find an active agent from this task's team, or any active agent
+        const taskActiveMembers = sprintTask.team.filter(a => activeAgents.includes(a));
+        const assignee = taskActiveMembers.length > 0
+          ? pick(taskActiveMembers)
+          : pick(activeAgents);
+
+        const status = pick(TASK_STATUSES);
+        return {
+          type: 'agent/task_update',
+          timestamp: now,
+          data: {
+            taskId,
+            title: sprintTask.title,
+            status,
+            assigneeId: assignee,
+            description: sprintTask.description,
+          },
+        };
+      }
+
+      // No active agents: only generate backlog items (planning, not execution)
       const taskPool = TASK_POOL[this.liveTaskCounter % TASK_POOL.length];
       const taskId = `live-task-${this.liveTaskCounter}`;
-      const status = pick(TASK_STATUSES);
-      const assignee = pickAgent();
       this.liveTaskCounter++;
       return {
         type: 'agent/task_update',
@@ -369,8 +509,7 @@ export class DemoEngine {
         data: {
           taskId,
           title: taskPool.title,
-          status,
-          assigneeId: assignee,
+          status: 'backlog',
           description: taskPool.description,
         },
       };
