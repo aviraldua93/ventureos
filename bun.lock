@@ -5,6 +5,7 @@
     "": {
       "name": "ventureos",
       "devDependencies": {
+        "picomatch": "^4.0.3",
         "typescript": "^5.7.0",
       },
     },

@@ -11,6 +11,7 @@
     "type-check": "bun run --filter '*' type-check"
   },
   "devDependencies": {
+    "picomatch": "^4.0.3",
     "typescript": "^5.7.0"
   }
 }
