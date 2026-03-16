@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * VentureOS Dashboard — Live Demo Recording
@@ -8,13 +8,27 @@ import { test, expect } from '@playwright/test';
  *
  *   npx playwright test e2e/demo-recording.spec.ts --project=demo
  *
- * The resulting .webm will be saved under ./videos/
+ * The resulting .webm will be saved under ./test-results/
  */
+
+/** Dismiss the AgentDetail overlay if visible. */
+async function dismissOverlay(page: Page) {
+  const overlay = page.locator('div[class*="overlay"]').first();
+  if (await overlay.isVisible({ timeout: 500 }).catch(() => false)) {
+    await overlay.click({ position: { x: 5, y: 5 }, force: true });
+    await page.waitForTimeout(600);
+  }
+  // Double-check: if still there, click body at top-left corner
+  if (await overlay.isVisible({ timeout: 300 }).catch(() => false)) {
+    await page.mouse.click(1, 1);
+    await page.waitForTimeout(600);
+  }
+}
+
 test.describe('VentureOS Live Demo Recording', () => {
   // Single long-running test so the entire flow is one continuous video
   test('full dashboard walkthrough', async ({ page }) => {
-    // Generous timeout — this is a demo, not a unit test
-    test.setTimeout(120_000);
+    test.setTimeout(180_000);
 
     // ── 1. Open the dashboard ───────────────────────────────────────────
     await page.goto('/');
@@ -63,17 +77,21 @@ test.describe('VentureOS Live Demo Recording', () => {
     const orgPanel = page.locator('[data-state="active"][role="tabpanel"]');
     await expect(orgPanel).toBeVisible();
 
-    // Try expanding / collapsing department nodes
-    const buttons = orgPanel.locator('button');
-    const btnCount = await buttons.count();
-    if (btnCount >= 2) {
-      await buttons.first().click();
-      await page.waitForTimeout(1500);
-      await buttons.nth(1).click();
-      await page.waitForTimeout(1500);
-      // Collapse them back
-      await buttons.first().click();
-      await page.waitForTimeout(1000);
+    // Interact with department / agent nodes in the org chart
+    const orgButtons = orgPanel.locator('button');
+    const btnCount = await orgButtons.count();
+    if (btnCount >= 1) {
+      // Click the first node to show agent details
+      await orgButtons.first().click();
+      await page.waitForTimeout(2500);
+      await dismissOverlay(page);
+
+      // Click a second node if available
+      if (btnCount >= 3) {
+        await orgButtons.nth(2).click({ force: true });
+        await page.waitForTimeout(2500);
+        await dismissOverlay(page);
+      }
     }
 
     // Search / filter if available
@@ -90,7 +108,7 @@ test.describe('VentureOS Live Demo Recording', () => {
     await page.waitForTimeout(1000);
 
     // ── 5. Virtual Office tab ───────────────────────────────────────────
-    await page.getByRole('tab', { name: 'Virtual Office' }).click();
+    await page.getByRole('tab', { name: 'Virtual Office' }).click({ force: true });
     await page.waitForTimeout(2500);
 
     const voPanel = page.locator('[data-testid="virtual-office"]');
@@ -114,7 +132,7 @@ test.describe('VentureOS Live Demo Recording', () => {
     await page.waitForTimeout(2000);
 
     // ── 6. Back to Dashboard — full experience ──────────────────────────
-    await page.getByRole('tab', { name: 'Dashboard' }).click();
+    await page.getByRole('tab', { name: 'Dashboard' }).click({ force: true });
     await page.waitForTimeout(1500);
 
     // Restart demo playback so the viewer sees the live data stream
