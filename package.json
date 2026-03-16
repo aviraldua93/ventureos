@@ -4,6 +4,7 @@
   "private": true,
   "workspaces": ["packages/*"],
   "scripts": {
+    "postinstall": "node scripts/fix-bun-types.js",
     "dev": "bun run --filter '@ventureos/server' dev & bun run --filter '@ventureos/dashboard' dev",
     "build": "bun run --filter '*' build",
     "test": "bun run --filter '*' test",
