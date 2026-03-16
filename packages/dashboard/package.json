@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "bun test",
+    "test:e2e": "bunx playwright test --config e2e/playwright.config.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
