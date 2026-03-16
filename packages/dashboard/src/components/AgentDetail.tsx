@@ -1,7 +1,26 @@
 import { useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useVentureStore } from '../store';
+import { Card, Badge } from './ui';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui';
+import css from './AgentDetail.module.css';
 
-type Tab = 'activity' | 'messages' | 'stats';
+const AGENT_COLORS = [
+  'var(--agent-color-1)', 'var(--agent-color-2)', 'var(--agent-color-3)',
+  'var(--agent-color-4)', 'var(--agent-color-5)', 'var(--agent-color-6)',
+];
+
+function getAgentColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AGENT_COLORS[Math.abs(hash) % AGENT_COLORS.length];
+}
+
+function getInitials(name: string): string {
+  return name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+}
 
 interface TimelineEntry {
   id: string;
@@ -11,18 +30,11 @@ interface TimelineEntry {
   detail: string;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  active: 'var(--green)',
-  idle: 'var(--yellow)',
-  error: 'var(--red)',
-  offline: 'var(--text-secondary)',
-};
-
 const TYPE_ICONS: Record<TimelineEntry['type'], string> = {
-  message_sent: '\U0001f4e4',
-  message_received: '\U0001f4e5',
-  task_update: '\U0001f4cb',
-  code_change: '\U0001f4bb',
+  message_sent: '📤',
+  message_received: '📥',
+  task_update: '📋',
+  code_change: '💻',
 };
 
 function formatTime(ts: number): string {
@@ -51,7 +63,7 @@ export function AgentDetail() {
     codeChanges,
   } = useVentureStore();
 
-  const [activeTab, setActiveTab] = useState<Tab>('activity');
+  const [activeTab, setActiveTab] = useState('activity');
 
   const agent = useMemo(
     () => agents.find((a) => a.id === selectedAgentId) ?? null,
@@ -108,87 +120,115 @@ export function AgentDetail() {
   }, [agentMessages, agentTasks, agentCodeChanges, selectedAgentId]);
 
   const handleClose = useCallback(() => setSelectedAgentId(null), [setSelectedAgentId]);
-  const handleBackdropClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) handleClose();
-    },
-    [handleClose],
-  );
 
   if (!selectedAgentId) return null;
 
   return (
-    <div className="agent-detail-backdrop" onClick={handleBackdropClick}>
-      <div className="agent-detail-panel">
-        <div className="agent-detail-header">
-          <div className="agent-detail-header-info">
-            {agent ? (
-              <>
-                <div className="agent-detail-name-row">
-                  <span
-                    className="agent-detail-status-dot"
-                    style={{ background: STATUS_COLORS[agent.status] ?? 'var(--text-secondary)' }}
-                  />
-                  <h2>{agent.name}</h2>
-                </div>
-                <span className="agent-detail-role">{agent.role}</span>
-                {agent.currentTask && (
-                  <span className="agent-detail-current-task">\U0001f527 {agent.currentTask}</span>
+    <AnimatePresence>
+      {selectedAgentId && (
+        <>
+          <motion.div
+            className={css.overlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={handleClose}
+          />
+          <motion.div
+            className={css.panel}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          >
+            <div className={css.header}>
+              <div className={css.headerInfo}>
+                {agent ? (
+                  <>
+                    <div className={css.agentRow}>
+                      <div
+                        className={css.agentAvatar}
+                        style={{ background: getAgentColor(agent.name) }}
+                      >
+                        {getInitials(agent.name)}
+                      </div>
+                      <div className={css.agentMeta}>
+                        <div className={css.agentName}>{agent.name}</div>
+                        <Badge status={agent.status}>{agent.status}</Badge>
+                      </div>
+                    </div>
+                    <span className={css.agentRole}>{agent.role}</span>
+                    {agent.currentTask && (
+                      <span className={css.currentTask}>🔧 {agent.currentTask}</span>
+                    )}
+                  </>
+                ) : (
+                  <div className={css.agentName}>Agent not found</div>
                 )}
-              </>
-            ) : (
-              <h2>Agent not found</h2>
-            )}
-          </div>
-          <button className="agent-detail-close" onClick={handleClose} aria-label="Close">
-            \u2715
-          </button>
-        </div>
-        <div className="agent-detail-tabs">
-          {(['activity', 'messages', 'stats'] as Tab[]).map((tab) => (
-            <button
-              key={tab}
-              className={`agent-detail-tab ${activeTab === tab ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-        <div className="agent-detail-content">
-          {activeTab === 'activity' && <ActivityTab timeline={timeline} />}
-          {activeTab === 'messages' && <MessagesTab messages={agentMessages} agentId={selectedAgentId} />}
-          {activeTab === 'stats' && agent && (
-            <StatsTab
-              agent={agent}
-              messagesSent={agentMessages.filter((m) => m.from === selectedAgentId).length}
-              tasksCompleted={agentTasks.filter((t) => t.status === 'done').length}
-              codeChangesCount={agentCodeChanges.length}
-            />
-          )}
-          {activeTab === 'stats' && !agent && <EmptyState text="Agent not found" />}
-        </div>
-      </div>
-    </div>
+              </div>
+              <button className={css.closeBtn} onClick={handleClose} aria-label="Close">
+                ✕
+              </button>
+            </div>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="activity">Activity</TabsTrigger>
+                <TabsTrigger value="messages">Messages</TabsTrigger>
+                <TabsTrigger value="stats">Stats</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="activity">
+                <div className={css.tabContent}>
+                  <ActivityTab timeline={timeline} />
+                </div>
+              </TabsContent>
+              <TabsContent value="messages">
+                <div className={css.tabContent}>
+                  <MessagesTab messages={agentMessages} agentId={selectedAgentId} />
+                </div>
+              </TabsContent>
+              <TabsContent value="stats">
+                <div className={css.tabContent}>
+                  {agent ? (
+                    <StatsTab
+                      agent={agent}
+                      messagesSent={agentMessages.filter((m) => m.from === selectedAgentId).length}
+                      tasksCompleted={agentTasks.filter((t) => t.status === 'done').length}
+                      codeChangesCount={agentCodeChanges.length}
+                    />
+                  ) : (
+                    <EmptyState text="Agent not found" />
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 
 function EmptyState({ text }: { text: string }) {
-  return <div className="agent-detail-empty">{text}</div>;
+  return <div className={css.emptyState}>{text}</div>;
 }
 
 function ActivityTab({ timeline }: { timeline: TimelineEntry[] }) {
   if (timeline.length === 0) return <EmptyState text="No activity yet" />;
   return (
-    <ul className="agent-detail-timeline">
+    <ul className={css.timeline}>
       {timeline.map((entry) => (
-        <li key={entry.id} className="timeline-item">
-          <span className="timeline-icon">{TYPE_ICONS[entry.type]}</span>
-          <div className="timeline-body">
-            <div className="timeline-label">{entry.label}</div>
-            <div className="timeline-detail">{entry.detail}</div>
-          </div>
-          <span className="timeline-time">{formatTime(entry.timestamp)}</span>
+        <li key={entry.id}>
+          <Card className={css.timelineItem}>
+            <span className={css.timelineIcon}>{TYPE_ICONS[entry.type]}</span>
+            <div className={css.timelineBody}>
+              <div className={css.timelineLabel}>{entry.label}</div>
+              <div className={css.timelineDetail}>{entry.detail}</div>
+            </div>
+            <span className={css.timelineTime}>{formatTime(entry.timestamp)}</span>
+          </Card>
         </li>
       ))}
     </ul>
@@ -205,20 +245,22 @@ function MessagesTab({
   if (messages.length === 0) return <EmptyState text="No messages yet" />;
   const sorted = [...messages].sort((a, b) => b.timestamp - a.timestamp);
   return (
-    <ul className="agent-detail-messages">
+    <ul className={css.messageList}>
       {sorted.map((m) => {
         const isSent = m.from === agentId;
         return (
-          <li key={m.id} className={`message-item ${isSent ? 'sent' : 'received'}`}>
-            <div className="message-meta">
-              <span className="message-direction">{isSent ? '\U0001f4e4 Sent' : '\U0001f4e5 Received'}</span>
-              <span className="message-type">{m.messageType}</span>
-              <span className="message-time">{formatTime(m.timestamp)}</span>
-            </div>
-            <div className="message-peer">
-              {isSent ? `To: ${m.to ?? 'broadcast'}` : `From: ${m.from}`}
-            </div>
-            <div className="message-content">{m.content}</div>
+          <li key={m.id}>
+            <Card className={`${css.messageItem} ${isSent ? css.messageSent : css.messageReceived}`}>
+              <div className={css.messageMeta}>
+                <span className={css.messageDirection}>{isSent ? '📤 Sent' : '📥 Received'}</span>
+                <span className={css.messageType}>{m.messageType}</span>
+                <span className={css.messageTime}>{formatTime(m.timestamp)}</span>
+              </div>
+              <div className={css.messagePeer}>
+                {isSent ? `To: ${m.to ?? 'broadcast'}` : `From: ${m.from}`}
+              </div>
+              <div className={css.messageContent}>{m.content}</div>
+            </Card>
           </li>
         );
       })}
@@ -238,21 +280,27 @@ function StatsTab({
   codeChangesCount: number;
 }) {
   return (
-    <div className="agent-detail-stats">
-      <StatRow label="Status" value={agent.status} />
-      <StatRow label="Messages sent" value={String(messagesSent)} />
-      <StatRow label="Tasks completed" value={String(tasksCompleted)} />
-      <StatRow label="Code changes" value={String(codeChangesCount)} />
-      <StatRow label="Registered" value={formatTimeSince(agent.lastHeartbeat)} />
-    </div>
-  );
-}
-
-function StatRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="stat-row">
-      <span className="stat-label">{label}</span>
-      <span className="stat-value">{value}</span>
+    <div className={css.stats}>
+      <Card className={css.statRow}>
+        <span className={css.statLabel}>Status</span>
+        <span className={css.statValue}>{agent.status}</span>
+      </Card>
+      <Card className={css.statRow}>
+        <span className={css.statLabel}>Messages sent</span>
+        <span className={css.statValue}>{messagesSent}</span>
+      </Card>
+      <Card className={css.statRow}>
+        <span className={css.statLabel}>Tasks completed</span>
+        <span className={css.statValue}>{tasksCompleted}</span>
+      </Card>
+      <Card className={css.statRow}>
+        <span className={css.statLabel}>Code changes</span>
+        <span className={css.statValue}>{codeChangesCount}</span>
+      </Card>
+      <Card className={css.statRow}>
+        <span className={css.statLabel}>Last heartbeat</span>
+        <span className={css.statValue}>{formatTimeSince(agent.lastHeartbeat)}</span>
+      </Card>
     </div>
   );
 }

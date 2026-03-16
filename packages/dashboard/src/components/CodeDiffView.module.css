@@ -1,0 +1,226 @@
+/* CodeDiffView — Syntax-highlighted diff viewer with design tokens */
+
+.container {
+  padding: var(--space-4);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+.heading {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-3);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+/* Empty state */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  font-style: italic;
+}
+
+/* Change list */
+.changeList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow-y: auto;
+  flex-shrink: 0;
+  max-height: 40%;
+  padding-bottom: var(--space-1);
+}
+
+.changeItem {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.changeItem:hover {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-default);
+}
+
+.changeItemActive {
+  border-color: var(--color-accent);
+  background: var(--color-bg-elevated);
+}
+
+.changeFilePath {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.changeDesc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.changeMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.agentBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.agentDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.stats {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.statAdd {
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+}
+
+.statDel {
+  color: var(--color-error);
+  font-weight: var(--font-weight-semibold);
+}
+
+.timestamp {
+  opacity: 0.7;
+  font-size: var(--font-size-xs);
+}
+
+/* Diff viewer */
+.viewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-2);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  min-height: 0;
+}
+
+.viewerHeader {
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.viewerFilePath {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+}
+
+.viewerMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.viewerDesc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Diff code block */
+.diffPre {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  background: var(--color-bg-base);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  font-family: var(--font-mono);
+}
+
+.diffLine {
+  display: flex;
+  min-height: 1.4em;
+  padding-right: var(--space-3);
+}
+
+.lineAdd {
+  background: rgba(61, 220, 132, 0.1);
+  color: var(--color-success);
+}
+
+.lineDel {
+  background: rgba(255, 92, 92, 0.1);
+  color: var(--color-error);
+}
+
+.lineHunk {
+  background: rgba(77, 159, 255, 0.1);
+  color: var(--color-info);
+}
+
+.lineNo {
+  display: inline-block;
+  width: 3rem;
+  text-align: right;
+  padding-right: var(--space-3);
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.lineText {
+  white-space: pre;
+}

@@ -1,131 +1,151 @@
+/* OrgChart — Tree visualization with design tokens */
+
 .container {
-  padding: 12px;
+  padding: var(--space-4);
   overflow-y: auto;
   height: 100%;
+  font-family: var(--font-sans);
 }
 
 .header {
-  margin: 0 0 12px 0;
-  font-size: 1.1rem;
-  color: #e0e0e0;
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
 }
 
 .empty {
-  color: #888;
-  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
   text-align: center;
-  padding: 32px 12px;
+  padding: var(--space-10) var(--space-4);
+  font-style: italic;
 }
 
 .tree {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .subtree {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .children {
-  margin-left: 20px;
-  padding-left: 12px;
-  border-left: 1px solid #0f3460;
+  margin-left: var(--space-6);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-border-subtle);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
+  position: relative;
 }
 
-.card {
+.nodeCard {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #16213e;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
   min-width: 0;
 }
 
-.card:hover {
-  border-color: #0f3460;
-  background: #1a2744;
+.nodeCard:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .cardSelected {
-  border-color: #4a8fe7;
-  background: #1a2744;
+  border-color: var(--color-accent);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-glow);
 }
 
-.dot {
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: #fff;
   flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-top: 5px;
-  transition: background-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.dotActive {
-  background-color: #22c55e;
-  box-shadow: 0 0 6px #22c55e80;
-}
-
-.dotIdle {
-  background-color: #eab308;
-  box-shadow: 0 0 6px #eab30880;
-}
-
-.dotError {
-  background-color: #ef4444;
-  box-shadow: 0 0 6px #ef444480;
-}
-
-.dotOffline {
-  background-color: #6b7280;
-  box-shadow: none;
+  text-transform: uppercase;
 }
 
 .info {
   min-width: 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .nameRow {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .name {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #e0e0e0;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
   white-space: nowrap;
 }
 
 .role {
-  font-size: 0.75rem;
-  color: #8899aa;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .task {
-  font-size: 0.75rem;
-  color: #aab;
-  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .heartbeat {
-  font-size: 0.65rem;
-  color: #667;
-  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.expandBtn {
+  all: unset;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.expandBtn:hover {
+  color: var(--color-text-primary);
+  background: var(--color-accent-muted);
 }

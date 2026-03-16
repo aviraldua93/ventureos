@@ -1,0 +1,143 @@
+/* App — Layout shell with design tokens */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.headerTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+}
+
+.connected {
+  background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
+}
+
+.disconnected {
+  background: var(--color-error);
+  box-shadow: 0 0 6px var(--color-error);
+}
+
+.statusText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Main content area */
+.mainContent {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dashboard tab layout */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 1px;
+  flex: 1;
+  overflow: hidden;
+  background: var(--color-border-default);
+}
+
+.panelLeft,
+.panelCenter,
+.panelRight {
+  background: var(--color-bg-base);
+  overflow-y: auto;
+}
+
+.panelCenter {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--color-border-default);
+}
+
+.panelCenter > * {
+  background: var(--color-bg-base);
+  flex: 1;
+}
+
+/* Status bar */
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-1) var(--space-6);
+  background: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border-default);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+.statusDivider {
+  color: var(--color-border-default);
+}
+
+.statusDotSmall {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  margin-left: auto;
+}
+
+/* Placeholder for future views */
+.placeholderView {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+.placeholderIcon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}

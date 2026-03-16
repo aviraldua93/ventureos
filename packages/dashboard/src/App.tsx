@@ -1,5 +1,6 @@
 import { useWebSocket } from './hooks/useWebSocket';
 import { useVentureStore } from './store';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui';
 import { OrgChart } from './components/OrgChart';
 import { MessageStream } from './components/MessageStream';
 import { TaskBoard } from './components/TaskBoard';
@@ -7,6 +8,7 @@ import { CodeDiffView } from './components/CodeDiffView';
 import { AgentDetail } from './components/AgentDetail';
 import { DemoControls } from './components/DemoControls';
 import './App.css';
+import css from './App.module.css';
 
 export default function App() {
   useWebSocket();
@@ -14,34 +16,56 @@ export default function App() {
   const eventCount = agents.length + tasks.length + messages.length + codeChanges.length;
 
   return (
-    <div className="app">
+    <div className={css.app}>
       {/* Header */}
-      <header className="header">
-        <div className="header-left">
-          <h1>🚀 VentureOS</h1>
-          <span className="subtitle">Mission Control for Agent Teams</span>
+      <header className={css.header}>
+        <div className={css.headerLeft}>
+          <h1 className={css.headerTitle}>🚀 VentureOS</h1>
+          <span className={css.subtitle}>Mission Control for Agent Teams</span>
         </div>
-        <div className="header-right">
-          <span className={`status-dot ${connected ? 'connected' : 'disconnected'}`} />
-          <span className="status-text">{connected ? 'Connected' : 'Disconnected'}</span>
+        <div className={css.headerRight}>
+          <span className={`${css.statusDot} ${connected ? css.connected : css.disconnected}`} />
+          <span className={css.statusText}>{connected ? 'Connected' : 'Disconnected'}</span>
         </div>
       </header>
 
-      {/* Main 3-panel layout */}
-      <main className="main-grid">
-        <aside className="panel-left">
-          <OrgChart />
-        </aside>
+      {/* Navigation Tabs */}
+      <Tabs defaultValue="dashboard" className={css.mainContent}>
+        <TabsList>
+          <TabsTrigger value="dashboard">📊 Dashboard</TabsTrigger>
+          <TabsTrigger value="office">🏢 Virtual Office</TabsTrigger>
+          <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
+        </TabsList>
 
-        <section className="panel-center">
-          <MessageStream />
-          <TaskBoard />
-        </section>
+        <TabsContent value="dashboard" style={{ flex: 1, overflow: 'hidden', padding: 0 }}>
+          <div className={css.dashboardGrid}>
+            <aside className={css.panelLeft}>
+              <OrgChart />
+            </aside>
+            <section className={css.panelCenter}>
+              <MessageStream />
+              <TaskBoard />
+            </section>
+            <aside className={css.panelRight}>
+              <CodeDiffView />
+            </aside>
+          </div>
+        </TabsContent>
 
-        <aside className="panel-right">
-          <CodeDiffView />
-        </aside>
-      </main>
+        <TabsContent value="office" style={{ flex: 1, overflow: 'hidden', padding: 0 }}>
+          <div className={css.placeholderView}>
+            <span className={css.placeholderIcon}>🏢</span>
+            <p>Virtual Office — Coming in Phase 2</p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="settings" style={{ flex: 1, overflow: 'hidden', padding: 0 }}>
+          <div className={css.placeholderView}>
+            <span className={css.placeholderIcon}>⚙️</span>
+            <p>Settings — Coming in Phase 2</p>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Agent detail slide-out panel */}
       <AgentDetail />
@@ -50,14 +74,14 @@ export default function App() {
       <DemoControls />
 
       {/* Status bar */}
-      <footer className="status-bar">
+      <footer className={css.statusBar}>
         <span>Agents: {agents.length}</span>
         <span>Tasks: {tasks.length}</span>
         <span>Messages: {messages.length}</span>
         <span>Code Changes: {codeChanges.length}</span>
-        <span className="status-bar-divider">|</span>
+        <span className={css.statusDivider}>|</span>
         <span>Total Events: {eventCount}</span>
-        <span className={`status-dot-small ${connected ? 'connected' : 'disconnected'}`} />
+        <span className={`${css.statusDotSmall} ${connected ? css.connected : css.disconnected}`} />
       </footer>
     </div>
   );

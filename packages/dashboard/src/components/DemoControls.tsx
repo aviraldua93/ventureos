@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from './ui';
+import css from './DemoControls.module.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -68,138 +71,64 @@ export function DemoControls() {
   const playLabel = !status.running
     ? '▶️ Play'
     : status.paused
-    ? '▶️ Resume'
-    : '⏸ Pause';
+      ? '▶️ Resume'
+      : '⏸ Pause';
 
   return (
     <>
       {status.running && (
-        <div className="demo-banner">
+        <motion.div
+          className={css.banner}
+          initial={{ y: -40 }}
+          animate={{ y: 0 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+        >
           🎬 Demo Mode — {status.paused ? 'Paused' : 'Playing'} at {status.speed}x
-        </div>
+        </motion.div>
       )}
 
-      <div className="demo-controls">
-        <div className="demo-controls-left">
-          <button className="demo-btn demo-btn-play" onClick={handlePlayPause}>
-            {playLabel}
-          </button>
-          <button className="demo-btn" onClick={handleRestart} title="Restart">
-            🔄 Restart
-          </button>
+      <div className={css.controls}>
+        <div className={css.left}>
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button variant="primary" size="sm" onClick={handlePlayPause}>
+              {playLabel}
+            </Button>
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button variant="secondary" size="sm" onClick={handleRestart}>
+              🔄 Restart
+            </Button>
+          </motion.div>
         </div>
 
-        <div className="demo-controls-center">
-          <div className="demo-progress-track">
-            <div
-              className="demo-progress-fill"
-              style={{ width: `${status.progress.pct}%` }}
+        <div className={css.center}>
+          <div className={css.progressTrack}>
+            <motion.div
+              className={css.progressFill}
+              animate={{ width: `${status.progress.pct}%` }}
+              transition={{ duration: 0.3 }}
             />
           </div>
-          <span className="demo-progress-text">
+          <span className={css.progressText}>
             {status.progress.current}/{status.progress.total} ({status.progress.pct}%)
           </span>
         </div>
 
-        <div className="demo-controls-right">
+        <div className={css.right}>
           {SPEEDS.map((s) => (
-            <button
-              key={s}
-              className={`demo-btn demo-btn-speed ${status.speed === s ? 'active' : ''}`}
-              onClick={() => handleSpeed(s)}
-            >
-              {s}x
-            </button>
+            <motion.div key={s} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={status.speed === s ? css.speedActive : undefined}
+                onClick={() => handleSpeed(s)}
+              >
+                {s}x
+              </Button>
+            </motion.div>
           ))}
         </div>
       </div>
-
-      <style>{`
-        .demo-banner {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 1000;
-          background: linear-gradient(90deg, #0f3460 0%, #1a1a4e 50%, #0f3460 100%);
-          color: #e6edf3;
-          text-align: center;
-          padding: 6px 0;
-          font-size: 0.8rem;
-          font-weight: 600;
-          letter-spacing: 0.5px;
-          border-bottom: 1px solid #30363d;
-        }
-        .demo-controls {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 1000;
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.5rem 1.5rem;
-          background: #161b22;
-          border-top: 1px solid #30363d;
-        }
-        .demo-controls-left,
-        .demo-controls-right {
-          display: flex;
-          gap: 0.4rem;
-          flex-shrink: 0;
-        }
-        .demo-controls-center {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-        .demo-btn {
-          background: #21262d;
-          border: 1px solid #30363d;
-          color: #e6edf3;
-          padding: 4px 12px;
-          border-radius: 6px;
-          font-size: 0.78rem;
-          cursor: pointer;
-          transition: background 0.15s;
-          white-space: nowrap;
-        }
-        .demo-btn:hover {
-          background: #30363d;
-        }
-        .demo-btn-play {
-          background: #0f3460;
-          border-color: #1a5276;
-        }
-        .demo-btn-play:hover {
-          background: #1a5276;
-        }
-        .demo-btn-speed.active {
-          background: #0f3460;
-          border-color: #58a6ff;
-          color: #58a6ff;
-        }
-        .demo-progress-track {
-          flex: 1;
-          height: 6px;
-          background: #21262d;
-          border-radius: 3px;
-          overflow: hidden;
-        }
-        .demo-progress-fill {
-          height: 100%;
-          background: #0f3460;
-          border-radius: 3px;
-          transition: width 0.3s ease;
-        }
-        .demo-progress-text {
-          font-size: 0.72rem;
-          color: #8b949e;
-          white-space: nowrap;
-        }
-      `}</style>
     </>
   );
 }

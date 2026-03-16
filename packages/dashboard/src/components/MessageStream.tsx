@@ -1,14 +1,16 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useVentureStore } from '../store';
-import './MessageStream.css';
+import { Card, Badge } from './ui';
+import css from './MessageStream.module.css';
 
 type MessageType = 'chat' | 'task' | 'review' | 'blocker';
 
-const TYPE_BADGES: Record<MessageType, string> = {
-  chat: '💬 chat',
-  task: '📋 task',
-  review: '🔍 review',
-  blocker: '⚠️ blocker',
+const TYPE_BADGE_STATUS: Record<MessageType, 'active' | 'idle' | 'error' | 'offline'> = {
+  chat: 'active',
+  task: 'idle',
+  review: 'offline',
+  blocker: 'error',
 };
 
 const FILTER_OPTIONS: Array<{ value: MessageType | 'all'; label: string }> = [
@@ -20,8 +22,10 @@ const FILTER_OPTIONS: Array<{ value: MessageType | 'all'; label: string }> = [
 ];
 
 const AVATAR_COLORS = [
-  '#e06c75', '#61afef', '#c678dd', '#98c379',
-  '#e5c07b', '#56b6c2', '#be5046', '#d19a66',
+  'var(--agent-color-1)', 'var(--agent-color-2)', 'var(--agent-color-3)',
+  'var(--agent-color-4)', 'var(--agent-color-5)', 'var(--agent-color-6)',
+  'var(--agent-color-7)', 'var(--agent-color-8)', 'var(--agent-color-9)',
+  'var(--agent-color-10)',
 ];
 
 function getAvatarColor(name: string): string {
@@ -32,22 +36,26 @@ function getAvatarColor(name: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 function formatRelativeTime(timestamp: number): string {
   const now = Date.now();
   const diffMs = now - timestamp;
   const diffSec = Math.floor(diffMs / 1000);
-
   if (diffSec < 10) return 'just now';
   if (diffSec < 60) return `${diffSec}s ago`;
-
   const diffMin = Math.floor(diffSec / 60);
   if (diffMin < 60) return `${diffMin}m ago`;
-
   const diffHr = Math.floor(diffMin / 60);
   if (diffHr < 24) return `${diffHr}h ago`;
-
-  const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay}d ago`;
+  return `${Math.floor(diffHr / 24)}d ago`;
 }
 
 export function MessageStream() {
@@ -60,14 +68,17 @@ export function MessageStream() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevMessageCount = useRef(0);
 
-  const agentNameMap = useRef(new Map<string, string>());
-  for (const agent of agents) {
-    agentNameMap.current.set(agent.id, agent.name);
-  }
+  const agentNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const agent of agents) {
+      map.set(agent.id, agent.name);
+    }
+    return map;
+  }, [agents]);
 
   const getAgentName = useCallback(
-    (id: string) => agentNameMap.current.get(id) ?? id,
-    [],
+    (id: string) => agentNameMap.get(id) ?? id,
+    [agentNameMap],
   );
 
   const filteredMessages =
@@ -101,14 +112,14 @@ export function MessageStream() {
   }, []);
 
   return (
-    <div className="message-stream">
-      <div className="ms-header">
-        <div className="ms-title">💬 Message Stream</div>
-        <div className="ms-filters">
+    <div className={css.container}>
+      <div className={css.header}>
+        <div className={css.title}>💬 Message Stream</div>
+        <div className={css.filters}>
           {FILTER_OPTIONS.map((opt) => (
             <button
               key={opt.value}
-              className={`ms-filter-btn${filter === opt.value ? ' active' : ''}`}
+              className={`${css.filterBtn} ${filter === opt.value ? css.filterBtnActive : ''}`}
               onClick={() => setFilter(opt.value)}
             >
               {opt.label}
@@ -118,51 +129,60 @@ export function MessageStream() {
       </div>
 
       {filteredMessages.length === 0 ? (
-        <div className="ms-empty">
+        <div className={css.empty}>
           No messages yet — waiting for agents to start talking
         </div>
       ) : (
-        <div className="ms-messages-wrapper">
+        <div className={css.messagesWrapper}>
           <div
-            className="ms-messages"
+            className={css.messages}
             ref={scrollRef}
             onScroll={handleScroll}
           >
-            {filteredMessages.map((msg) => {
-              const senderName = getAgentName(msg.from);
-              const recipientName = msg.to
-                ? getAgentName(msg.to)
-                : 'broadcast';
+            <AnimatePresence initial={false}>
+              {filteredMessages.map((msg) => {
+                const senderName = getAgentName(msg.from);
+                const recipientName = msg.to
+                  ? getAgentName(msg.to)
+                  : 'broadcast';
 
-              return (
-                <div key={msg.id} className="ms-message">
-                  <div
-                    className="ms-avatar"
-                    style={{ background: getAvatarColor(senderName) }}
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {senderName[0]}
-                  </div>
-                  <div className="ms-body">
-                    <div className="ms-meta">
-                      <span className="ms-sender">{senderName}</span>
-                      <span className="ms-arrow">→</span>
-                      <span className="ms-recipient">{recipientName}</span>
-                      <span className="ms-type-badge">
-                        {TYPE_BADGES[msg.messageType]}
-                      </span>
-                    </div>
-                    <div className="ms-content">{msg.content}</div>
-                    <div className="ms-timestamp">
-                      {formatRelativeTime(msg.timestamp)}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                    <Card className={css.messageCard}>
+                      <div
+                        className={css.avatar}
+                        style={{ background: getAvatarColor(senderName) }}
+                      >
+                        {getInitials(senderName)}
+                      </div>
+                      <div className={css.body}>
+                        <div className={css.meta}>
+                          <span className={css.sender}>{senderName}</span>
+                          <span className={css.arrow}>→</span>
+                          <span className={css.recipient}>{recipientName}</span>
+                          <Badge status={TYPE_BADGE_STATUS[msg.messageType]}>
+                            {msg.messageType}
+                          </Badge>
+                        </div>
+                        <div className={css.content}>{msg.content}</div>
+                        <div className={css.timestamp}>
+                          {formatRelativeTime(msg.timestamp)}
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
 
           {isUserScrolled && (
-            <button className="ms-scroll-btn" onClick={scrollToBottom}>
+            <button className={css.scrollBtn} onClick={scrollToBottom}>
               ↓ New messages
             </button>
           )}
