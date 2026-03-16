@@ -73,7 +73,12 @@ const server = Bun.serve<WSData>({
 
     // HTTP routes
     const response = router(req);
-    if (response) return withCors(response);
+    if (response) {
+      if (response instanceof Promise) {
+        return response.then(withCors);
+      }
+      return withCors(response);
+    }
 
     // 404
     return withCors(new Response('Not Found', { status: 404 }));

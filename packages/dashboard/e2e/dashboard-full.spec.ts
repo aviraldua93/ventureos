@@ -127,11 +127,14 @@ test.describe('Dashboard Tab — P0', () => {
 
   test('status bar: displays non-zero counts', async ({ page }) => {
     const statusBar = page.locator('[data-testid="status-bar"]');
-    const text = await statusBar.textContent();
-    const numbers = text?.match(/\d+/g) || [];
-    expect(numbers.length).toBeGreaterThan(0);
-    const hasNonZero = numbers.some(n => parseInt(n) > 0);
-    expect(hasNonZero).toBe(true);
+    // Wait for demo events to populate — the demo auto-starts and needs time to emit events
+    await expect(async () => {
+      const text = await statusBar.textContent();
+      const numbers = text?.match(/\d+/g) || [];
+      expect(numbers.length).toBeGreaterThan(0);
+      const hasNonZero = numbers.some(n => parseInt(n) > 0);
+      expect(hasNonZero).toBe(true);
+    }).toPass({ timeout: 10_000 });
   });
 
   test('connection status is displayed in status bar', async ({ page }) => {
