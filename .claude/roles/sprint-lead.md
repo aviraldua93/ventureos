@@ -52,6 +52,19 @@ When a phase completes:
 6. Track: check back in 1 hour that ICs are actually working
 ```
 
+## Deployment Checklist (MANDATORY after every code push)
+
+```
+After ANY code is pushed to main:
+1. Restart backend server (bun run packages/server/src/index.ts)
+2. Restart frontend server (local vite binary, NOT bunx)
+3. Push live team data (bun run scripts/push-live-team.ts)
+4. Verify backend: GET /api/health returns 200
+5. Verify frontend: localhost:5173 loads with data
+6. The Owner must NEVER see a broken or empty dashboard.
+   If they do, that's a Sprint Lead failure.
+```
+
 ## Status Protocol
 
 - When asked for status: poll all VPs, aggregate, report to CEO.

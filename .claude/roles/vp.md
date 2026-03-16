@@ -19,6 +19,10 @@
 - **If you can't deploy within 30 minutes, escalate.** Tell Sprint Lead why and what's blocking you.
 - **Never sit idle between phases.** If your team has no active tasks, ask Sprint Lead what's next or find prep work.
 
+## Deployment Rule
+
+- **Every code push must leave the product working.** After your ICs push code, verify: servers restarted, data loaded, dashboard renders with data. Never push and walk away.
+
 ## Status Protocol
 
 - When asked for status: check with each of your ICs, aggregate, report up.
