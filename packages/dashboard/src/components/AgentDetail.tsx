@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVentureStore } from '../store';
-import { Card, Badge } from './ui';
+import { Badge } from './ui';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui';
 import css from './AgentDetail.module.css';
 
@@ -31,10 +31,10 @@ interface TimelineEntry {
 }
 
 const TYPE_ICONS: Record<TimelineEntry['type'], string> = {
-  message_sent: '📤',
-  message_received: '📥',
-  task_update: '📋',
-  code_change: '💻',
+  message_sent: '↗',
+  message_received: '↙',
+  task_update: '◎',
+  code_change: '⟨⟩',
 };
 
 function formatTime(ts: number): string {
@@ -154,13 +154,18 @@ export function AgentDetail() {
                         {getInitials(agent.name)}
                       </div>
                       <div className={css.agentMeta}>
-                        <div className={css.agentName}>{agent.name}</div>
-                        <Badge status={agent.status}>{agent.status}</Badge>
+                        <div className={css.agentNameRow}>
+                          <span className={css.agentName}>{agent.name}</span>
+                          <Badge status={agent.status}>{agent.status}</Badge>
+                        </div>
+                        <span className={css.agentRole}>{agent.role}</span>
                       </div>
                     </div>
-                    <span className={css.agentRole}>{agent.role}</span>
                     {agent.currentTask && (
-                      <span className={css.currentTask}>🔧 {agent.currentTask}</span>
+                      <span className={css.currentTask}>
+                        <span className={css.currentTaskIcon}>●</span>
+                        {agent.currentTask}
+                      </span>
                     )}
                   </>
                 ) : (
@@ -221,14 +226,14 @@ function ActivityTab({ timeline }: { timeline: TimelineEntry[] }) {
     <ul className={css.timeline}>
       {timeline.map((entry) => (
         <li key={entry.id}>
-          <Card className={css.timelineItem}>
+          <div className={css.timelineItem}>
             <span className={css.timelineIcon}>{TYPE_ICONS[entry.type]}</span>
             <div className={css.timelineBody}>
               <div className={css.timelineLabel}>{entry.label}</div>
               <div className={css.timelineDetail}>{entry.detail}</div>
             </div>
             <span className={css.timelineTime}>{formatTime(entry.timestamp)}</span>
-          </Card>
+          </div>
         </li>
       ))}
     </ul>
@@ -250,9 +255,9 @@ function MessagesTab({
         const isSent = m.from === agentId;
         return (
           <li key={m.id}>
-            <Card className={`${css.messageItem} ${isSent ? css.messageSent : css.messageReceived}`}>
+            <div className={`${css.messageItem} ${isSent ? css.messageSent : css.messageReceived}`}>
               <div className={css.messageMeta}>
-                <span className={css.messageDirection}>{isSent ? '📤 Sent' : '📥 Received'}</span>
+                <span className={css.messageDirection}>{isSent ? '↗ Sent' : '↙ Received'}</span>
                 <span className={css.messageType}>{m.messageType}</span>
                 <span className={css.messageTime}>{formatTime(m.timestamp)}</span>
               </div>
@@ -260,7 +265,7 @@ function MessagesTab({
                 {isSent ? `To: ${m.to ?? 'broadcast'}` : `From: ${m.from}`}
               </div>
               <div className={css.messageContent}>{m.content}</div>
-            </Card>
+            </div>
           </li>
         );
       })}
@@ -280,27 +285,27 @@ function StatsTab({
   codeChangesCount: number;
 }) {
   return (
-    <div className={css.stats}>
-      <Card className={css.statRow}>
-        <span className={css.statLabel}>Status</span>
-        <span className={css.statValue}>{agent.status}</span>
-      </Card>
-      <Card className={css.statRow}>
-        <span className={css.statLabel}>Messages sent</span>
-        <span className={css.statValue}>{messagesSent}</span>
-      </Card>
-      <Card className={css.statRow}>
-        <span className={css.statLabel}>Tasks completed</span>
-        <span className={css.statValue}>{tasksCompleted}</span>
-      </Card>
-      <Card className={css.statRow}>
-        <span className={css.statLabel}>Code changes</span>
-        <span className={css.statValue}>{codeChangesCount}</span>
-      </Card>
-      <Card className={css.statRow}>
-        <span className={css.statLabel}>Last heartbeat</span>
-        <span className={css.statValue}>{formatTimeSince(agent.lastHeartbeat)}</span>
-      </Card>
+    <div className={css.statsGrid}>
+      <div className={css.statBox}>
+        <span className={css.statBoxValue}>{agent.status}</span>
+        <span className={css.statBoxLabel}>Status</span>
+      </div>
+      <div className={css.statBox}>
+        <span className={css.statBoxValue}>{messagesSent}</span>
+        <span className={css.statBoxLabel}>Messages sent</span>
+      </div>
+      <div className={css.statBox}>
+        <span className={css.statBoxValue}>{tasksCompleted}</span>
+        <span className={css.statBoxLabel}>Tasks completed</span>
+      </div>
+      <div className={css.statBox}>
+        <span className={css.statBoxValue}>{codeChangesCount}</span>
+        <span className={css.statBoxLabel}>Code changes</span>
+      </div>
+      <div className={`${css.statBox} ${css.statBoxFull}`}>
+        <span className={css.statBoxValue}>{formatTimeSince(agent.lastHeartbeat)}</span>
+        <span className={css.statBoxLabel}>Last heartbeat</span>
+      </div>
     </div>
   );
 }

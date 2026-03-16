@@ -1,7 +1,6 @@
-/* MessageStream — Modern chat feed with design tokens */
+/* MessageStream — Activity feed (Linear/GitHub density) */
 
 .container {
-  padding: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -10,48 +9,75 @@
   background: var(--color-bg-base);
 }
 
+/* ── Header ── */
 .header {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-default);
+  display: flex;
+  align-items: center;
+  padding: 8px var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
+  gap: var(--space-2);
 }
 
 .title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
   color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
 }
 
+.messageCount {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent);
+  font-weight: 500;
+  font-family: var(--font-mono);
+  background: rgba(77, 159, 255, 0.1);
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  line-height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Filters ── */
 .filters {
   display: flex;
-  gap: var(--space-1);
-  flex-wrap: wrap;
+  gap: 3px;
+  flex-wrap: nowrap;
+  margin-left: auto;
 }
 
 .filterBtn {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border-default);
+  padding: 2px 8px;
+  border: none;
   border-radius: var(--radius-full);
   background: transparent;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color 120ms ease, background 120ms ease;
   font-family: var(--font-sans);
+  white-space: nowrap;
+  line-height: 20px;
 }
 
 .filterBtn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
 }
 
 .filterBtnActive {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
+  background: rgba(77, 159, 255, 0.1);
+  color: var(--color-accent);
 }
 
+.filterBtnActive:hover {
+  background: rgba(77, 159, 255, 0.15);
+  color: var(--color-accent);
+}
+
+/* ── Messages list ── */
 .messagesWrapper {
   flex: 1;
   position: relative;
@@ -63,14 +89,13 @@
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-3) var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  padding: 2px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
 }
 
 .messages::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .messages::-webkit-scrollbar-track {
@@ -79,57 +104,49 @@
 
 .messages::-webkit-scrollbar-thumb {
   background: var(--color-border-default);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
-.groupHeader {
+.messages::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ── Message row ── */
+.messageRow {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background 100ms ease;
 }
 
-.groupAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: #fff;
-  flex-shrink: 0;
-  text-transform: uppercase;
+.messageRow:hover {
+  background: rgba(255, 255, 255, 0.025);
 }
 
-.groupName {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+.messageRow:last-child {
+  border-bottom: none;
 }
 
-.messageCard {
-  display: flex;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-}
-
+/* ── Avatar ── */
 .avatar {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-size: 9px;
+  font-weight: 700;
   color: #fff;
   flex-shrink: 0;
   text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-top: 1px;
 }
 
+/* ── Body ── */
 .body {
   flex: 1;
   min-width: 0;
@@ -138,70 +155,130 @@
 .meta {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
+  gap: 6px;
+  line-height: 1;
   margin-bottom: 2px;
 }
 
 .sender {
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
 }
 
 .arrow {
   color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
+  font-size: 9px;
+  opacity: 0.5;
 }
 
 .recipient {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.content {
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-normal);
-  word-break: break-word;
-}
-
-.timestamp {
-  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  margin-top: var(--space-1);
 }
 
+/* ── Type pills ── */
+.typePill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 16px;
+}
+
+.typePill.chat {
+  background: rgba(77, 159, 255, 0.1);
+  color: var(--color-accent);
+}
+
+.typePill.task {
+  background: rgba(255, 182, 71, 0.1);
+  color: var(--color-warning);
+}
+
+.typePill.review {
+  background: rgba(163, 139, 250, 0.1);
+  color: var(--agent-color-5);
+}
+
+.typePill.blocker {
+  background: rgba(255, 92, 92, 0.12);
+  color: var(--color-error);
+}
+
+/* ── Timestamp ── */
+.timestamp {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  opacity: 0.7;
+}
+
+/* ── Content ── */
+.content {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  word-break: break-word;
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Scroll-to-bottom pill ── */
 .scrollBtn {
   position: absolute;
-  bottom: var(--space-3);
-  right: var(--space-5);
-  padding: var(--space-1) var(--space-3);
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-full);
-  background: var(--color-bg-surface);
+  background: var(--color-bg-elevated);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: border-color 120ms ease, color 120ms ease;
   font-family: var(--font-sans);
-  z-index: 1;
-  box-shadow: var(--shadow-md);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  line-height: 18px;
+  white-space: nowrap;
 }
 
 .scrollBtn:hover {
   border-color: var(--color-accent);
-  color: var(--color-text-primary);
+  color: var(--color-accent);
 }
 
+/* ── Empty state ── */
 .empty {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   padding: var(--space-8);
+}
+
+.emptyText {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.emptySub {
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  font-size: var(--font-size-base);
-  font-style: italic;
-  text-align: center;
 }

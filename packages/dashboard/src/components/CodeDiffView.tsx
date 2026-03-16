@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVentureStore } from '../store';
-import { Card } from './ui';
 import css from './CodeDiffView.module.css';
 
 const AGENT_COLORS = [
@@ -72,9 +71,8 @@ export function CodeDiffView() {
   if (sorted.length === 0) {
     return (
       <div className={css.container}>
-        <h2 className={css.heading}>📝 Code Diffs</h2>
+        <h2 className={css.heading}>Code Changes</h2>
         <div className={css.emptyState}>
-          <span className={css.emptyIcon}>📂</span>
           <p className={css.emptyText}>No code changes yet</p>
         </div>
       </div>
@@ -83,7 +81,10 @@ export function CodeDiffView() {
 
   return (
     <div className={css.container}>
-      <h2 className={css.heading}>📝 Code Diffs</h2>
+      <h2 className={css.heading}>
+        Code Changes
+        <span className={css.countBadge}>{sorted.length}</span>
+      </h2>
 
       <div className={css.changeList}>
         {sorted.map((change) => {
@@ -93,12 +94,10 @@ export function CodeDiffView() {
           const agentColor = getAgentColor(change.agentId);
 
           return (
-            <motion.button
+            <button
               key={change.id}
               className={`${css.changeItem} ${isActive ? css.changeItemActive : ''}`}
               onClick={() => handleSelect(change.id)}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
             >
               <div className={css.changeFilePath}>{change.filePath}</div>
               <div className={css.changeDesc}>{change.description}</div>
@@ -106,7 +105,7 @@ export function CodeDiffView() {
                 <span className={css.agentBadge}>
                   <span
                     className={css.agentDot}
-                    style={{ backgroundColor: agentColor, boxShadow: `0 0 4px ${agentColor}` }}
+                    style={{ backgroundColor: agentColor }}
                   />
                   {agentName}
                 </span>
@@ -116,7 +115,7 @@ export function CodeDiffView() {
                 </span>
                 <span className={css.timestamp}>{formatRelativeTime(change.timestamp)}</span>
               </div>
-            </motion.button>
+            </button>
           );
         })}
       </div>
@@ -124,10 +123,11 @@ export function CodeDiffView() {
       <AnimatePresence>
         {selected && (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2 }}
+            className={css.viewer}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
           >
             <DiffViewer
               change={selected}
@@ -150,20 +150,20 @@ function DiffViewer({ change, agentName }: DiffViewerProps) {
   const agentColor = getAgentColor(change.agentId);
 
   return (
-    <Card className={css.viewer}>
+    <>
       <div className={css.viewerHeader}>
         <div className={css.viewerFilePath}>{change.filePath}</div>
         <div className={css.viewerMeta}>
           <span className={css.agentBadge}>
             <span
               className={css.agentDot}
-              style={{ backgroundColor: agentColor, boxShadow: `0 0 4px ${agentColor}` }}
+              style={{ backgroundColor: agentColor }}
             />
             {agentName}
           </span>
           <span className={css.timestamp}>{formatRelativeTime(change.timestamp)}</span>
         </div>
-        <div className={css.viewerDesc}>{change.description}</div>
+        {change.description && <div className={css.viewerDesc}>{change.description}</div>}
       </div>
 
       <pre className={css.diffPre}>
@@ -176,6 +176,6 @@ function DiffViewer({ change, agentName }: DiffViewerProps) {
           ))}
         </code>
       </pre>
-    </Card>
+    </>
   );
 }

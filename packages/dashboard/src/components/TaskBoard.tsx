@@ -1,14 +1,20 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVentureStore } from '../store';
-import { Card, Badge } from './ui';
 import css from './TaskBoard.module.css';
 
+const STATUS_DOT_CLASS: Record<string, string> = {
+  backlog: css.backlog,
+  in_progress: css.inProgress,
+  review: css.review,
+  done: css.done,
+};
+
 const COLUMNS = [
-  { key: 'backlog', label: 'Backlog', emoji: '📋', accent: css.columnBacklog },
-  { key: 'in_progress', label: 'In Progress', emoji: '🔄', accent: css.columnInProgress },
-  { key: 'review', label: 'Review', emoji: '👀', accent: css.columnReview },
-  { key: 'done', label: 'Done', emoji: '✅', accent: css.columnDone },
+  { key: 'backlog', label: 'Backlog', accent: css.columnBacklog },
+  { key: 'in_progress', label: 'In Progress', accent: css.columnInProgress },
+  { key: 'review', label: 'Review', accent: css.columnReview },
+  { key: 'done', label: 'Done', accent: css.columnDone },
 ] as const;
 
 const AGENT_COLORS = [
@@ -34,23 +40,6 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .toUpperCase();
 }
-
-function formatRelativeTime(timestamp: number): string {
-  const diff = Date.now() - timestamp;
-  if (diff < 60_000) return 'just now';
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
-const STATUS_MAP: Record<string, 'active' | 'idle' | 'error' | 'offline'> = {
-  backlog: 'offline',
-  in_progress: 'active',
-  review: 'idle',
-  done: 'active',
-};
 
 export function TaskBoard() {
   const tasks = useVentureStore((s) => s.tasks);
@@ -82,22 +71,26 @@ export function TaskBoard() {
 
   return (
     <div className={css.container}>
-      <h2 className={css.heading}>📋 Task Board</h2>
+      <div className={css.header}>
+        <h2 className={css.heading}>Tasks</h2>
+        <span className={css.taskCount}>{tasks.length}</span>
+      </div>
       <div className={css.board}>
         {COLUMNS.map((col) => {
           const columnTasks = grouped[col.key] || [];
           return (
             <div key={col.key} className={`${css.column} ${col.accent}`}>
               <div className={css.columnHeader}>
-                <span>
-                  {col.emoji} {col.label}
+                <span className={css.columnLabel}>
+                  <span className={css.columnDot} />
+                  {col.label}
                 </span>
                 <span className={css.count}>{columnTasks.length}</span>
               </div>
-              <div className={css.cardList}>
-                {columnTasks.length === 0 ? (
-                  <p className={css.empty}>No tasks</p>
-                ) : (
+              {columnTasks.length === 0 ? (
+                <div className={css.empty}>No tasks</div>
+              ) : (
+                <div className={css.cardList}>
                   <AnimatePresence mode="popLayout">
                     {columnTasks.map((task) => {
                       const assigneeName = task.assigneeId
@@ -111,13 +104,18 @@ export function TaskBoard() {
                         <motion.div
                           key={task.id}
                           layout
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.2 }}
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.12 }}
                         >
-                          <Card elevated className={css.taskCard}>
-                            <div className={css.cardTitle}>{task.title}</div>
+                          <div className={css.taskCard}>
+                            <div className={css.cardBody}>
+                              <span className={css.cardTitle}>{task.title}</span>
+                              <span
+                                className={`${css.statusDot} ${STATUS_DOT_CLASS[task.status] ?? ''}`}
+                              />
+                            </div>
                             <div className={css.cardMeta}>
                               <span className={css.assignee}>
                                 <span
@@ -126,22 +124,18 @@ export function TaskBoard() {
                                 >
                                   {getInitials(assigneeName)}
                                 </span>
-                                {assigneeName}
+                                <span className={css.assigneeName}>
+                                  {assigneeName}
+                                </span>
                               </span>
-                              <Badge status={STATUS_MAP[task.status] ?? 'offline'}>
-                                {task.status.replace('_', ' ')}
-                              </Badge>
                             </div>
-                            <div className={css.timestamp}>
-                              {formatRelativeTime(task.updatedAt)}
-                            </div>
-                          </Card>
+                          </div>
                         </motion.div>
                       );
                     })}
                   </AnimatePresence>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           );
         })}

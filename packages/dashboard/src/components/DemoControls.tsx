@@ -68,37 +68,29 @@ export function DemoControls() {
     post('/api/demo/restart');
   };
 
-  const playLabel = !status.running
-    ? '▶️ Play'
-    : status.paused
-      ? '▶️ Resume'
-      : '⏸ Pause';
+  const playIcon = !status.running ? '▶' : status.paused ? '▶' : '⏸';
 
   return (
     <>
       {status.running && (
         <motion.div
           className={css.banner}
-          initial={{ y: -40 }}
-          animate={{ y: 0 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.15 }}
         >
-          🎬 Demo Mode — {status.paused ? 'Paused' : 'Playing'} at {status.speed}x
+          Demo — {status.paused ? 'Paused' : 'Playing'} · {status.speed}×
         </motion.div>
       )}
 
       <div className={css.controls} data-testid="demo-controls">
         <div className={css.left}>
-          <motion.div whileTap={{ scale: 0.95 }}>
-            <Button variant="primary" size="sm" onClick={handlePlayPause}>
-              {playLabel}
-            </Button>
-          </motion.div>
-          <motion.div whileTap={{ scale: 0.95 }}>
-            <Button variant="secondary" size="sm" onClick={handleRestart}>
-              🔄 Restart
-            </Button>
-          </motion.div>
+          <Button variant="ghost" size="sm" onClick={handlePlayPause}>
+            {playIcon}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleRestart}>
+            ↺
+          </Button>
         </div>
 
         <div className={css.center}>
@@ -110,22 +102,21 @@ export function DemoControls() {
             />
           </div>
           <span className={css.progressText}>
-            {status.progress.current}/{status.progress.total} ({status.progress.pct}%)
+            {status.progress.current}/{status.progress.total}
           </span>
         </div>
 
         <div className={css.right}>
           {SPEEDS.map((s) => (
-            <motion.div key={s} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={status.speed === s ? css.speedActive : undefined}
-                onClick={() => handleSpeed(s)}
-              >
-                {s}x
-              </Button>
-            </motion.div>
+            <Button
+              key={s}
+              variant="ghost"
+              size="sm"
+              className={status.speed === s ? css.speedActive : undefined}
+              onClick={() => handleSpeed(s)}
+            >
+              {s}×
+            </Button>
           ))}
         </div>
       </div>

@@ -1,24 +1,16 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVentureStore } from '../store';
-import { Card, Badge } from './ui';
 import css from './MessageStream.module.css';
 
 type MessageType = 'chat' | 'task' | 'review' | 'blocker';
 
-const TYPE_BADGE_STATUS: Record<MessageType, 'active' | 'idle' | 'error' | 'offline'> = {
-  chat: 'active',
-  task: 'idle',
-  review: 'offline',
-  blocker: 'error',
-};
-
 const FILTER_OPTIONS: Array<{ value: MessageType | 'all'; label: string }> = [
   { value: 'all', label: 'All' },
-  { value: 'chat', label: '💬 Chat' },
-  { value: 'task', label: '📋 Task' },
-  { value: 'review', label: '🔍 Review' },
-  { value: 'blocker', label: '⚠️ Blocker' },
+  { value: 'chat', label: 'Chat' },
+  { value: 'task', label: 'Task' },
+  { value: 'review', label: 'Review' },
+  { value: 'blocker', label: 'Blocker' },
 ];
 
 const AVATAR_COLORS = [
@@ -49,13 +41,13 @@ function formatRelativeTime(timestamp: number): string {
   const now = Date.now();
   const diffMs = now - timestamp;
   const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 10) return 'just now';
-  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffSec < 10) return 'now';
+  if (diffSec < 60) return `${diffSec}s`;
   const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return `${diffMin}m`;
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  return `${Math.floor(diffHr / 24)}d ago`;
+  if (diffHr < 24) return `${diffHr}h`;
+  return `${Math.floor(diffHr / 24)}d`;
 }
 
 export function MessageStream() {
@@ -81,10 +73,13 @@ export function MessageStream() {
     [agentNameMap],
   );
 
-  const filteredMessages =
-    filter === 'all'
-      ? messages
-      : messages.filter((m) => m.messageType === filter);
+  const filteredMessages = useMemo(
+    () =>
+      filter === 'all'
+        ? messages
+        : messages.filter((m) => m.messageType === filter),
+    [messages, filter],
+  );
 
   useEffect(() => {
     if (
@@ -105,16 +100,15 @@ export function MessageStream() {
   }, []);
 
   const scrollToBottom = useCallback(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      setIsUserScrolled(false);
-    }
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+    setIsUserScrolled(false);
   }, []);
 
   return (
     <div className={css.container}>
       <div className={css.header}>
-        <div className={css.title}>💬 Message Stream</div>
+        <span className={css.title}>Activity</span>
+        <span className={css.messageCount}>{filteredMessages.length}</span>
         <div className={css.filters}>
           {FILTER_OPTIONS.map((opt) => (
             <button
@@ -130,7 +124,8 @@ export function MessageStream() {
 
       {filteredMessages.length === 0 ? (
         <div className={css.empty}>
-          No messages yet — waiting for agents to start talking
+          <span className={css.emptyText}>No activity yet</span>
+          <span className={css.emptySub}>Messages will appear here as agents communicate</span>
         </div>
       ) : (
         <div className={css.messagesWrapper}>
@@ -149,43 +144,51 @@ export function MessageStream() {
                 return (
                   <motion.div
                     key={msg.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
+                    className={css.messageRow}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.15 }}
                   >
-                    <Card className={css.messageCard}>
-                      <div
-                        className={css.avatar}
-                        style={{ background: getAvatarColor(senderName) }}
-                      >
-                        {getInitials(senderName)}
-                      </div>
-                      <div className={css.body}>
-                        <div className={css.meta}>
-                          <span className={css.sender}>{senderName}</span>
-                          <span className={css.arrow}>→</span>
-                          <span className={css.recipient}>{recipientName}</span>
-                          <Badge status={TYPE_BADGE_STATUS[msg.messageType]}>
-                            {msg.messageType}
-                          </Badge>
-                        </div>
-                        <div className={css.content}>{msg.content}</div>
-                        <div className={css.timestamp}>
+                    <div
+                      className={css.avatar}
+                      style={{ background: getAvatarColor(senderName) }}
+                    >
+                      {getInitials(senderName)}
+                    </div>
+                    <div className={css.body}>
+                      <div className={css.meta}>
+                        <span className={css.sender}>{senderName}</span>
+                        <span className={css.arrow}>→</span>
+                        <span className={css.recipient}>{recipientName}</span>
+                        <span className={`${css.typePill} ${css[msg.messageType]}`}>
+                          {msg.messageType}
+                        </span>
+                        <span className={css.timestamp}>
                           {formatRelativeTime(msg.timestamp)}
-                        </div>
+                        </span>
                       </div>
-                    </Card>
+                      <div className={css.content}>{msg.content}</div>
+                    </div>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
           </div>
 
-          {isUserScrolled && (
-            <button className={css.scrollBtn} onClick={scrollToBottom}>
-              ↓ New messages
-            </button>
-          )}
+          <AnimatePresence>
+            {isUserScrolled && (
+              <motion.button
+                className={css.scrollBtn}
+                onClick={scrollToBottom}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+                transition={{ duration: 0.15 }}
+              >
+                ↓ New messages
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </div>
