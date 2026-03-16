@@ -11,6 +11,13 @@
 .card:hover {
   border-color: var(--color-border-default);
   box-shadow: var(--shadow-md);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
   transform: translateY(-1px);
 }
 

@@ -75,10 +75,9 @@
 .dashboardGrid {
   display: grid;
   grid-template-columns: 280px 1fr 320px;
-  gap: 1px;
+  gap: var(--space-2);
   flex: 1;
   overflow: hidden;
-  background: var(--color-border-default);
 }
 
 .panelLeft,
@@ -91,8 +90,7 @@
 .panelCenter {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: var(--color-border-default);
+  gap: var(--space-3);
 }
 
 .panelCenter > * {
@@ -140,4 +138,24 @@
 .placeholderIcon {
   font-size: 2.5rem;
   opacity: 0.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
+  .dashboardGrid {
+    grid-template-columns: 280px 1fr;
+  }
+  .panelRight {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .panelLeft {
+    max-height: 40vh;
+  }
 }

@@ -230,7 +230,7 @@
 }
 
 .messageContent {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--color-text-primary);
   line-height: var(--line-height-normal);
   word-break: break-word;

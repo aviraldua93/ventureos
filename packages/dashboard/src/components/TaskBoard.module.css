@@ -23,7 +23,19 @@
   gap: var(--space-3);
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow: auto;
+}
+
+@media (max-width: 1024px) {
+  .board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
 }
 
 .column {
@@ -124,7 +136,7 @@
 }
 
 .timestamp {
-  opacity: 0.7;
+  color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
 

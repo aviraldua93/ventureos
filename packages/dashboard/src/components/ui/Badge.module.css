@@ -3,12 +3,11 @@
   align-items: center;
   gap: var(--space-1);
   font-family: var(--font-sans);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   padding: 2px var(--space-2);
   border-radius: var(--radius-full);
   line-height: var(--line-height-normal);
-  text-transform: uppercase;
   letter-spacing: 0.03em;
   white-space: nowrap;
 }
