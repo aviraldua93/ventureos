@@ -5,7 +5,7 @@ const AGENT_COLORS = [
 ];
 
 export type AnimationState = 'idle' | 'walking' | 'typing' | 'talking' | 'error' | 'offline';
-export type EmotionState = 'neutral' | 'busy' | 'thinking' | 'frustrated' | 'excited' | 'focused';
+export type EmotionState = 'neutral' | 'busy' | 'thinking' | 'frustrated' | 'excited' | 'focused' | 'collaborating';
 
 export interface SpeechBubbleData {
   type: string;

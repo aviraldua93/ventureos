@@ -17,9 +17,10 @@ const PORT = Number(process.env.PORT) || 3000;
 const store = new EventStore({ persist: false });
 const projections = new Projections(store);
 
-// Initialize demo engine
+// Initialize demo engine and auto-start so the office is alive on boot
 const demo = new DemoEngine(store);
 demo.loadScenario(demoScenario);
+demo.start(1);
 
 const router = createRouter(projections, demo);
 
@@ -28,11 +29,29 @@ store.subscribe((event) => {
   broadcastEvent(event);
 });
 
+const CORS_HEADERS: Record<string, string> = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+function withCors(res: Response): Response {
+  for (const [k, v] of Object.entries(CORS_HEADERS)) {
+    res.headers.set(k, v);
+  }
+  return res;
+}
+
 const server = Bun.serve<WSData>({
   port: PORT,
 
   fetch(req, server) {
     const url = new URL(req.url);
+
+    // CORS preflight
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
 
     // WebSocket upgrade
     if (url.pathname === '/ws') {
@@ -48,16 +67,16 @@ const server = Bun.serve<WSData>({
         const event = (await req.json()) as VentureEvent;
         event.timestamp = event.timestamp || Date.now();
         await store.append(event);
-        return Response.json({ ok: true, count: store.count });
+        return withCors(Response.json({ ok: true, count: store.count }));
       })();
     }
 
     // HTTP routes
     const response = router(req);
-    if (response) return response;
+    if (response) return withCors(response);
 
     // 404
-    return new Response('Not Found', { status: 404 });
+    return withCors(new Response('Not Found', { status: 404 }));
   },
 
   websocket: {

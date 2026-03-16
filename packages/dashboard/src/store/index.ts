@@ -42,14 +42,18 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
 
   addEvent: (event) => {
     const state = get();
-    // Append to event log for time-travel replay
-    state.eventLog.push(event);
+    // Immutable eventLog update — ensures Zustand detects the change
+    const eventLog = [...state.eventLog, event];
 
     switch (event.type) {
       case 'agent/register': {
         const existing = state.agents.find((a) => a.id === event.data.agentId);
-        if (existing) return;
+        if (existing) {
+          set({ eventLog });
+          return;
+        }
         set({
+          eventLog,
           agents: [
             ...state.agents,
             {
@@ -68,6 +72,7 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
 
       case 'agent/heartbeat': {
         set({
+          eventLog,
           agents: state.agents.map((a) =>
             a.id === event.data.agentId
               ? {
@@ -86,6 +91,7 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
         const existingTask = state.tasks.find((t) => t.id === event.data.taskId);
         if (existingTask) {
           set({
+            eventLog,
             tasks: state.tasks.map((t) =>
               t.id === event.data.taskId
                 ? {
@@ -101,6 +107,7 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
           });
         } else {
           set({
+            eventLog,
             tasks: [
               ...state.tasks,
               {
@@ -119,6 +126,7 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
 
       case 'agent/message': {
         set({
+          eventLog,
           messages: [
             ...state.messages,
             {
@@ -136,6 +144,7 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
 
       case 'agent/code_change': {
         set({
+          eventLog,
           codeChanges: [
             ...state.codeChanges,
             {
@@ -148,6 +157,11 @@ export const useVentureStore = create<VentureStore>((set, get) => ({
             },
           ],
         });
+        break;
+      }
+
+      default: {
+        set({ eventLog });
         break;
       }
     }

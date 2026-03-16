@@ -4,6 +4,16 @@ import type { OfficeEngine } from '../engine/OfficeEngine';
 import type { VentureEvent } from '@ventureos/shared';
 import type { EmotionState } from '../engine/SpriteManager';
 
+/** Rooms idle agents can wander to for a "living office" feel */
+const WANDER_TARGETS = [
+  { x: 8, y: 2 },   // Break room (coffee)
+  { x: 14, y: 2 },  // Meeting Room A
+  { x: 20, y: 2 },  // Meeting Room B
+  { x: 14, y: 14 }, // Collab Space
+  { x: 5, y: 14 },  // Lobby
+  { x: 11, y: 7 },  // Open office center
+];
+
 /**
  * Binds Zustand agent state to Canvas2D sprite behaviors.
  * Maps events to character animations, positions, effects, and emotions.
@@ -14,6 +24,7 @@ export function useAgentSync(engine: OfficeEngine | null) {
   const processedEvents = useRef(0);
   const deskAssignments = useRef(new Map<string, number>());
   const processingRef = useRef(false);
+  const wanderTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Process new events in batches
   useEffect(() => {
@@ -55,13 +66,25 @@ export function useAgentSync(engine: OfficeEngine | null) {
     }
   }, [engine, eventLog.length]);
 
-  // Sync agent statuses and derive emotions
+  // Sync agent statuses, spawn sprites for snapshot agents, derive emotions
   useEffect(() => {
     if (!engine?.ready) return;
 
+    const desks = engine.tileMap.getDesks();
+
     for (const agent of agents) {
-      const sprite = engine.sprites.getSprite(agent.id);
-      if (!sprite) continue;
+      let sprite = engine.sprites.getSprite(agent.id);
+
+      // Spawn sprite if missing (snapshot agents or late arrivals)
+      if (!sprite) {
+        const deskIdx = deskAssignments.current.size % desks.length;
+        deskAssignments.current.set(agent.id, deskIdx);
+        const desk = desks[deskIdx];
+        sprite = engine.sprites.spawn(
+          agent.id, agent.name, agent.role,
+          desk.x, desk.y + 1,
+        );
+      }
 
       // Map agent status to animation state
       switch (agent.status) {
@@ -91,6 +114,56 @@ export function useAgentSync(engine: OfficeEngine | null) {
       engine.camera.updateAgentPosition(agent.id, sprite.container.x, sprite.container.y);
     }
   }, [engine, agents]);
+
+  // Idle wandering — periodically move random idle agents for a living office feel
+  useEffect(() => {
+    if (!engine?.ready) return;
+
+    wanderTimerRef.current = setInterval(() => {
+      if (!engine?.ready) return;
+
+      const sprites = engine.sprites.getAllSprites();
+      const idleSprites = sprites.filter(s => s.state === 'idle' && s.path.length === 0);
+      if (idleSprites.length === 0) return;
+
+      // Pick a random idle agent to wander
+      const sprite = idleSprites[Math.floor(Math.random() * idleSprites.length)];
+
+      // 60% chance to wander, 40% stay put
+      if (Math.random() > 0.6) return;
+
+      const desks = engine.tileMap.getDesks();
+      const deskIdx = deskAssignments.current.get(sprite.id);
+
+      // Pick destination: 50% go somewhere fun, 50% return to desk
+      let target: { x: number; y: number };
+      const atDesk = deskIdx !== undefined && (() => {
+        const desk = desks[deskIdx];
+        return sprite.tileX === desk.x && sprite.tileY === desk.y + 1;
+      })();
+
+      if (atDesk || Math.random() < 0.5) {
+        target = WANDER_TARGETS[Math.floor(Math.random() * WANDER_TARGETS.length)];
+      } else if (deskIdx !== undefined) {
+        const desk = desks[deskIdx];
+        target = { x: desk.x, y: desk.y + 1 };
+      } else {
+        target = WANDER_TARGETS[Math.floor(Math.random() * WANDER_TARGETS.length)];
+      }
+
+      const path = engine.pathFinder.findPath(sprite.tileX, sprite.tileY, target.x, target.y);
+      if (path.length > 1) {
+        engine.sprites.setPath(sprite.id, path);
+      }
+    }, 3000);
+
+    return () => {
+      if (wanderTimerRef.current) {
+        clearInterval(wanderTimerRef.current);
+        wanderTimerRef.current = null;
+      }
+    };
+  }, [engine, engine?.ready]);
 }
 
 /** Derive emotion from agent operational state */
@@ -100,6 +173,7 @@ function deriveEmotion(status: string, currentTask?: string, animState?: string)
   if (status === 'active') {
     if (currentTask?.toLowerCase().includes('review')) return 'thinking';
     if (currentTask?.toLowerCase().includes('deploy')) return 'excited';
+    if (animState === 'talking') return 'collaborating';
     if (animState === 'typing') return 'focused';
     return 'busy';
   }

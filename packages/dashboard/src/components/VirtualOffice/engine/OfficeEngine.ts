@@ -319,13 +319,21 @@ export class OfficeEngine {
       ctx.translate(0, animY);
 
       // Emotion glow ring
-      if (sprite.emotion && sprite.emotion !== 'neutral') {
-        const glowColors: Record<string, string> = {
-          busy: '#ff6eb4', thinking: '#a78bfa', frustrated: '#ff5c5c',
-          excited: '#ffb647', focused: '#4d9fff',
-        };
-        const glow = glowColors[sprite.emotion] || '#4d9fff';
-        ctx.globalAlpha = 0.25 + Math.sin(performance.now() / 500) * 0.1;
+      const glowColors: Record<string, string> = {
+        busy: '#ff5c5c',          // red for busy
+        thinking: '#a78bfa',      // purple pulse for thinking
+        frustrated: '#ff5c5c',    // red for error/frustrated
+        excited: '#ffb647',       // orange for excited
+        focused: '#3ddc84',       // green for active/focused
+        collaborating: '#4d9fff', // blue for collaborating
+        neutral: '#666677',       // subtle gray for idle
+      };
+      const glow = glowColors[sprite.emotion] || null;
+      if (glow) {
+        const pulseRate = sprite.emotion === 'thinking' ? 300 : 500;
+        ctx.globalAlpha = sprite.emotion === 'neutral'
+          ? 0.12
+          : 0.25 + Math.sin(performance.now() / pulseRate) * 0.1;
         ctx.fillStyle = glow;
         ctx.beginPath();
         ctx.arc(0, 0, 14, 0, Math.PI * 2);
@@ -370,7 +378,8 @@ export class OfficeEngine {
       // Emotion indicator
       if (sprite.emotion && sprite.emotion !== 'neutral') {
         const emotionIcons: Record<string, string> = {
-          busy: '🔥', thinking: '💭', frustrated: '😤', excited: '⚡', focused: '🎯',
+          busy: '🔥', thinking: '💭', frustrated: '😤',
+          excited: '⚡', focused: '🎯', collaborating: '🤝',
         };
         const icon = emotionIcons[sprite.emotion];
         if (icon) {
