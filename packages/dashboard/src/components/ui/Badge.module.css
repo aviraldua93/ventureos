@@ -1,0 +1,61 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  line-height: var(--line-height-normal);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Status variants */
+.active {
+  background: rgba(61, 220, 132, 0.12);
+  color: var(--color-success);
+}
+
+.active .dot {
+  background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
+}
+
+.idle {
+  background: rgba(255, 182, 71, 0.12);
+  color: var(--color-warning);
+}
+
+.idle .dot {
+  background: var(--color-warning);
+  box-shadow: 0 0 6px var(--color-warning);
+}
+
+.error {
+  background: rgba(255, 92, 92, 0.12);
+  color: var(--color-error);
+}
+
+.error .dot {
+  background: var(--color-error);
+  box-shadow: 0 0 6px var(--color-error);
+}
+
+.offline {
+  background: rgba(85, 102, 119, 0.12);
+  color: var(--color-offline);
+}
+
+.offline .dot {
+  background: var(--color-offline);
+}

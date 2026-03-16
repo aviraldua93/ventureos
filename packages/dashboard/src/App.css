@@ -1,16 +1,18 @@
-/* VentureOS Dashboard — Dark Theme */
+/* VentureOS Dashboard — Sprint 3 Design System */
+@import './styles/tokens.css';
 
+/* Legacy aliases (bridging old → new tokens) */
 :root {
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --border: #30363d;
-  --text-primary: #e6edf3;
-  --text-secondary: #8b949e;
-  --accent: #58a6ff;
-  --green: #3fb950;
-  --red: #f85149;
-  --yellow: #d29922;
+  --bg-primary: var(--color-bg-base);
+  --bg-secondary: var(--color-bg-surface);
+  --bg-tertiary: var(--color-bg-elevated);
+  --border: var(--color-border-default);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --accent: var(--color-accent);
+  --green: var(--color-success);
+  --red: var(--color-error);
+  --yellow: var(--color-warning);
 }
 
 * {

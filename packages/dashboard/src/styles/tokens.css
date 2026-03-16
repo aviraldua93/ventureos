@@ -1,0 +1,112 @@
+/* VentureOS Design System — Sprint 3 Tokens
+ * Mission Control dark theme: deep navy, electric blue accents,
+ * amber warnings, green success.
+ */
+
+:root {
+  /* === Colors: Semantic === */
+  --color-bg-base:        #0a0e14;
+  --color-bg-surface:     #111820;
+  --color-bg-elevated:    #1a2233;
+  --color-bg-overlay:     rgba(0, 0, 0, 0.6);
+  --color-border-default: #2a3544;
+  --color-border-subtle:  #1e2a38;
+  --color-text-primary:   #e8edf4;
+  --color-text-secondary: #8899aa;
+  --color-text-muted:     #556677;
+
+  /* === Colors: Interactive === */
+  --color-accent:         #4d9fff;
+  --color-accent-hover:   #6db3ff;
+  --color-accent-muted:   rgba(77, 159, 255, 0.15);
+
+  /* === Colors: Status === */
+  --color-success:        #3ddc84;
+  --color-warning:        #ffb647;
+  --color-error:          #ff5c5c;
+  --color-info:           #4d9fff;
+  --color-offline:        #556677;
+
+  /* === Agent Palette === */
+  --agent-color-1:  #4d9fff;
+  --agent-color-2:  #3ddc84;
+  --agent-color-3:  #ff6eb4;
+  --agent-color-4:  #ffb647;
+  --agent-color-5:  #a78bfa;
+  --agent-color-6:  #38bdf8;
+  --agent-color-7:  #fb923c;
+  --agent-color-8:  #f472b6;
+  --agent-color-9:  #34d399;
+  --agent-color-10: #c084fc;
+
+  /* === Typography === */
+  --font-sans:       'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:       'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Consolas, monospace;
+  --font-size-xs:    0.6875rem;  /* 11px */
+  --font-size-sm:    0.75rem;    /* 12px */
+  --font-size-base:  0.875rem;   /* 14px */
+  --font-size-md:    1rem;       /* 16px */
+  --font-size-lg:    1.125rem;   /* 18px */
+  --font-size-xl:    1.5rem;     /* 24px */
+  --font-size-2xl:   2rem;       /* 32px */
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  --line-height-tight:    1.25;
+  --line-height-normal:   1.5;
+  --line-height-relaxed:  1.75;
+
+  /* === Spacing (4px base) === */
+  --space-1:  0.25rem;   /* 4px */
+  --space-2:  0.5rem;    /* 8px */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+
+  /* === Radii === */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* === Shadows === */
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(77, 159, 255, 0.15);
+
+  /* === Transitions === */
+  --transition-fast:   120ms ease-out;
+  --transition-normal: 200ms ease-out;
+  --transition-slow:   350ms ease-in-out;
+
+  /* === Z-Index === */
+  --z-base:      0;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   300;
+  --z-modal:     400;
+  --z-toast:     500;
+}
+
+/* Light theme override */
+[data-theme="light"] {
+  --color-bg-base:        #f8f9fb;
+  --color-bg-surface:     #ffffff;
+  --color-bg-elevated:    #f0f2f5;
+  --color-border-default: #d1d9e0;
+  --color-border-subtle:  #e4e8ee;
+  --color-text-primary:   #1a2233;
+  --color-text-secondary: #556677;
+  --color-text-muted:     #8899aa;
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.15);
+}
