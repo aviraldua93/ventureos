@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { Agent } from '@ventureos/shared';
 import type { OfficeEngine } from '../engine/OfficeEngine';
+import { defaultOffice } from '../maps/default-office';
 import css from './OfficeControls.module.css';
 
 interface OfficeControlsProps {
@@ -23,8 +24,8 @@ export function OfficeControls({ engine, agents }: OfficeControlsProps) {
 
   const resetView = useCallback(() => {
     if (!engine) return;
-    const mapW = 24 * 32;
-    const mapH = 18 * 32;
+    const mapW = defaultOffice.width * defaultOffice.tileSize;
+    const mapH = defaultOffice.height * defaultOffice.tileSize;
     engine.camera.centerOn(mapW / 2, mapH / 2);
     engine.camera.setZoom(1);
     engine.camera.followAgent(null);

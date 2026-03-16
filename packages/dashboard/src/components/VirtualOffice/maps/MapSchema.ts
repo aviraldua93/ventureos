@@ -17,12 +17,15 @@ export enum FurnitureType {
   Plant = 'plant',
   Monitor = 'monitor',
   Bookshelf = 'bookshelf',
+  KanbanBoard = 'kanban',
+  TestStation = 'test_station',
+  Couch = 'couch',
 }
 
 export interface RoomDef {
   id: string;
   name: string;
-  type: 'lobby' | 'open_office' | 'meeting_room' | 'server_room' | 'break_room' | 'corner_office';
+  type: 'lobby' | 'open_office' | 'meeting_room' | 'server_room' | 'break_room' | 'corner_office' | 'pm_war_room' | 'qa_lab' | 'research_lab' | 'community_lounge' | 'testing_bay';
   /** Top-left tile coordinate */
   x: number;
   y: number;

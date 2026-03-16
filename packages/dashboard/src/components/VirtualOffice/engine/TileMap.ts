@@ -19,6 +19,9 @@ const FURNITURE_COLORS: Record<FurnitureType, number> = {
   [FurnitureType.Plant]:        0x3ddc84,
   [FurnitureType.Monitor]:      0x111820,
   [FurnitureType.Bookshelf]:    0x8b6914,
+  [FurnitureType.KanbanBoard]:  0xe8edf4,
+  [FurnitureType.TestStation]:  0x111820,
+  [FurnitureType.Couch]:        0x7c6f5b,
 };
 
 export class TileMap {

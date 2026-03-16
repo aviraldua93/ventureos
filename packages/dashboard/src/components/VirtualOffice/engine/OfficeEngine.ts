@@ -36,6 +36,39 @@ const FURNITURE_COLORS: Record<FurnitureType, string> = {
   [FurnitureType.Plant]:        '#3ddc84',
   [FurnitureType.Monitor]:      '#111820',
   [FurnitureType.Bookshelf]:    '#8b6914',
+  [FurnitureType.KanbanBoard]:  '#e8edf4',
+  [FurnitureType.TestStation]:  '#111820',
+  [FurnitureType.Couch]:        '#7c6f5b',
+};
+
+/** Room-type floor tints give each zone a unique visual identity */
+const ROOM_FLOOR_TINTS: Record<string, string> = {
+  corner_office:    'rgba(77, 159, 255, 0.10)',
+  meeting_room:     'rgba(168, 139, 250, 0.08)',
+  pm_war_room:      'rgba(255, 182, 71, 0.10)',
+  open_office:      'rgba(61, 220, 132, 0.06)',
+  research_lab:     'rgba(139, 92, 246, 0.12)',
+  qa_lab:           'rgba(56, 189, 248, 0.10)',
+  testing_bay:      'rgba(251, 146, 60, 0.10)',
+  community_lounge: 'rgba(52, 211, 153, 0.12)',
+  break_room:       'rgba(255, 110, 180, 0.08)',
+  lobby:            'rgba(255, 255, 255, 0.06)',
+  server_room:      'rgba(26, 34, 51, 0.15)',
+};
+
+/** Accent colors for room labels */
+const ROOM_LABEL_COLORS: Record<string, string> = {
+  corner_office:    'rgba(77, 159, 255, 0.22)',
+  meeting_room:     'rgba(168, 139, 250, 0.18)',
+  pm_war_room:      'rgba(255, 182, 71, 0.22)',
+  open_office:      'rgba(61, 220, 132, 0.16)',
+  research_lab:     'rgba(139, 92, 246, 0.22)',
+  qa_lab:           'rgba(56, 189, 248, 0.20)',
+  testing_bay:      'rgba(251, 146, 60, 0.20)',
+  community_lounge: 'rgba(52, 211, 153, 0.22)',
+  break_room:       'rgba(255, 110, 180, 0.18)',
+  lobby:            'rgba(255, 255, 255, 0.14)',
+  server_room:      'rgba(77, 159, 255, 0.15)',
 };
 
 /**
@@ -158,23 +191,35 @@ export class OfficeEngine {
       }
     }
 
-    // Room overlays
-    octx.fillStyle = 'rgba(77, 159, 255, 0.04)';
+    // Room overlays — per-type floor tints for visual identity
     for (const room of rooms) {
-      octx.fillRect(
-        room.x * tileSize + 2, room.y * tileSize + 2,
-        room.width * tileSize - 4, room.height * tileSize - 4,
+      const tint = ROOM_FLOOR_TINTS[room.type];
+      if (tint) {
+        octx.fillStyle = tint;
+        octx.fillRect(
+          room.x * tileSize, room.y * tileSize,
+          room.width * tileSize, room.height * tileSize,
+        );
+      }
+      // Subtle inner border accent
+      const accent = ROOM_LABEL_COLORS[room.type] ?? 'rgba(255,255,255,0.06)';
+      octx.strokeStyle = accent;
+      octx.lineWidth = 1.5;
+      octx.strokeRect(
+        room.x * tileSize + 1, room.y * tileSize + 1,
+        room.width * tileSize - 2, room.height * tileSize - 2,
       );
     }
 
-    // Room labels
-    octx.fillStyle = 'rgba(255,255,255,0.08)';
-    octx.font = '9px monospace';
+    // Room labels — bold with accent color
     octx.textAlign = 'center';
     octx.textBaseline = 'middle';
     for (const room of rooms) {
       const cx = (room.x + room.width / 2) * tileSize;
       const cy = (room.y + room.height / 2) * tileSize;
+      const labelColor = ROOM_LABEL_COLORS[room.type] ?? 'rgba(255,255,255,0.10)';
+      octx.font = 'bold 10px monospace';
+      octx.fillStyle = labelColor;
       octx.fillText(room.name, cx, cy);
     }
 
@@ -245,6 +290,59 @@ export class OfficeEngine {
           ctx.fillStyle = bookColors[i];
           ctx.fillRect(px + 5 + i * 5, py + 4, 4, s - 10);
         }
+        break;
+      case FurnitureType.KanbanBoard:
+        // Board background
+        ctx.fillRect(px + 2, py + 4, s - 4, s - 8);
+        ctx.strokeStyle = '#8899aa';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(px + 2, py + 4, s - 4, s - 8);
+        // Column dividers
+        { const colW = (s - 4) / 3;
+          ctx.beginPath();
+          ctx.moveTo(px + 2 + colW, py + 4);
+          ctx.lineTo(px + 2 + colW, py + s - 4);
+          ctx.moveTo(px + 2 + colW * 2, py + 4);
+          ctx.lineTo(px + 2 + colW * 2, py + s - 4);
+          ctx.stroke();
+          // Sticky notes
+          const noteColors = ['#ff6eb4', '#4d9fff', '#3ddc84', '#ffb647'];
+          for (let i = 0; i < 4; i++) {
+            ctx.fillStyle = noteColors[i];
+            ctx.fillRect(px + 4 + (i % 3) * colW, py + 7 + Math.floor(i / 3) * 8, 6, 5);
+          }
+        }
+        break;
+      case FurnitureType.TestStation:
+        // Monitor housing
+        this.roundRect(ctx, px + 4, py + 4, s - 8, s - 10, 2);
+        ctx.fill();
+        // Screen
+        ctx.fillStyle = '#0d1117';
+        ctx.fillRect(px + 6, py + 6, s - 12, s - 14);
+        // Status lights
+        ctx.fillStyle = '#3ddc84';
+        ctx.beginPath();
+        ctx.arc(px + 10, py + s - 4, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ff5c5c';
+        ctx.beginPath();
+        ctx.arc(px + 16, py + s - 4, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffb647';
+        ctx.beginPath();
+        ctx.arc(px + 22, py + s - 4, 2, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      case FurnitureType.Couch:
+        // Cushion
+        ctx.fillStyle = '#7c6f5b';
+        this.roundRect(ctx, px + 2, py + 8, s - 4, s - 12, 4);
+        ctx.fill();
+        // Back rest
+        ctx.fillStyle = '#6b5f4d';
+        this.roundRect(ctx, px + 2, py + 4, s - 4, 8, 3);
+        ctx.fill();
         break;
       default:
         ctx.fillRect(px + 4, py + 4, s - 8, s - 8);

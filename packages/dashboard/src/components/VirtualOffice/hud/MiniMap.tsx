@@ -17,6 +17,21 @@ const TILE_FILLS: Record<TileType, string> = {
   [TileType.Empty]:  '#0d1117',
 };
 
+/** Minimap room floor tints — keyed by room type */
+const ROOM_MINI_COLORS: Record<string, string> = {
+  corner_office:    '#1a3050',
+  meeting_room:     '#2a1e40',
+  pm_war_room:      '#302818',
+  open_office:      '#162e22',
+  research_lab:     '#221838',
+  qa_lab:           '#142830',
+  testing_bay:      '#2a2018',
+  community_lounge: '#14302a',
+  break_room:       '#2a1828',
+  lobby:            '#1e2428',
+  server_room:      '#0e1420',
+};
+
 interface MiniMapProps {
   engine: OfficeEngine | null;
   mapData: OfficeMap;
@@ -45,6 +60,15 @@ export function MiniMap({ engine, mapData }: MiniMapProps) {
           const tile = mapData.tiles[y][x];
           ctx.fillStyle = TILE_FILLS[tile] ?? '#0d1117';
           ctx.fillRect(x * scale, y * scale, scale, scale);
+        }
+      }
+
+      // Room-specific floor color overlay
+      for (const room of mapData.rooms) {
+        const roomColor = ROOM_MINI_COLORS[room.type];
+        if (roomColor) {
+          ctx.fillStyle = roomColor;
+          ctx.fillRect(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
         }
       }
 
