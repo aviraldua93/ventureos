@@ -16,6 +16,10 @@ const VirtualOffice = lazy(() =>
   import('./components/VirtualOffice/VirtualOffice').then(m => ({ default: m.VirtualOffice }))
 );
 
+const ThrongletOffice = lazy(() =>
+  import('./components/Thronglet/ThrongletOffice').then(m => ({ default: m.ThrongletOffice }))
+);
+
 // Spectator mode: read-only view triggered by ?spectator=1 URL param
 const isSpectator = new URLSearchParams(window.location.search).get('spectator') === '1';
 
@@ -100,6 +104,7 @@ export default function App() {
             <TabsTrigger value="dashboard" className={css.navTrigger}>Dashboard</TabsTrigger>
             <TabsTrigger value="org" className={css.navTrigger}>Org Chart</TabsTrigger>
             <TabsTrigger value="office" className={css.navTrigger}>Virtual Office</TabsTrigger>
+            <TabsTrigger value="thronglet" className={css.navTrigger}>🐾 Throng</TabsTrigger>
             {!isSpectator && <TabsTrigger value="settings" className={css.navTrigger}>Settings</TabsTrigger>}
           </TabsList>
         </div>
@@ -160,6 +165,27 @@ export default function App() {
             </div>
           }>
             <VirtualOffice />
+          </Suspense>
+        </ErrorBoundary>
+      </TabsContent>
+
+      {/* Thronglet Office tab — pixel-art agent nursery */}
+      <TabsContent value="thronglet" className={css.tabContent}>
+        <ErrorBoundary fallback={
+          <div className={css.placeholderView}>
+            <div className={css.placeholderIcon}>⚠️</div>
+            <p className={css.placeholderTitle}>Throng Error</p>
+            <p className={css.placeholderDesc}>The creature engine encountered an error. Try refreshing the page.</p>
+          </div>
+        }>
+          <Suspense fallback={
+            <div className={css.placeholderView}>
+              <div className={css.placeholderIcon}>🥚</div>
+              <p className={css.placeholderTitle}>Hatching Creatures…</p>
+              <p className={css.placeholderDesc}>Initializing the nursery</p>
+            </div>
+          }>
+            <ThrongletOffice />
           </Suspense>
         </ErrorBoundary>
       </TabsContent>
