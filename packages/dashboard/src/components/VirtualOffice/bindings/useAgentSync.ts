@@ -235,28 +235,32 @@ export function useAgentSync(engine: OfficeEngine | null) {
       const idleSprites = sprites.filter(s => s.state === 'idle' && s.path.length === 0);
       if (idleSprites.length === 0) return;
 
-      const sprite = idleSprites[Math.floor(Math.random() * idleSprites.length)];
-      if (Math.random() > 0.6) return;
+      // Pick 1–2 idle sprites to wander each tick
+      const count = Math.min(idleSprites.length, Math.random() < 0.5 ? 2 : 1);
+      for (let i = 0; i < count; i++) {
+        const sprite = idleSprites[Math.floor(Math.random() * idleSprites.length)];
+        if (Math.random() > 0.8) continue; // 20% skip (was 60%)
 
-      const assignment = roomAssignments.current.get(sprite.id);
+        const assignment = roomAssignments.current.get(sprite.id);
 
-      // Pick destination: 50% wander to common area, 50% return home
-      let target: { x: number; y: number };
-      const atHome = assignment && sprite.tileX === assignment.homeX && sprite.tileY === assignment.homeY;
+        // Pick destination: 50% wander to common area, 50% return home
+        let target: { x: number; y: number };
+        const atHome = assignment && sprite.tileX === assignment.homeX && sprite.tileY === assignment.homeY;
 
-      if (atHome || Math.random() < 0.5) {
-        target = WANDER_TARGETS[Math.floor(Math.random() * WANDER_TARGETS.length)];
-      } else if (assignment) {
-        target = { x: assignment.homeX, y: assignment.homeY };
-      } else {
-        target = WANDER_TARGETS[Math.floor(Math.random() * WANDER_TARGETS.length)];
+        if (atHome || Math.random() < 0.5) {
+          target = WANDER_TARGETS[Math.floor(Math.random() * WANDER_TARGETS.length)];
+        } else if (assignment) {
+          target = { x: assignment.homeX, y: assignment.homeY };
+        } else {
+          target = WANDER_TARGETS[Math.floor(Math.random() * WANDER_TARGETS.length)];
+        }
+
+        const path = engine.pathFinder.findPath(sprite.tileX, sprite.tileY, target.x, target.y);
+        if (path.length > 1) {
+          engine.sprites.setPath(sprite.id, path);
+        }
       }
-
-      const path = engine.pathFinder.findPath(sprite.tileX, sprite.tileY, target.x, target.y);
-      if (path.length > 1) {
-        engine.sprites.setPath(sprite.id, path);
-      }
-    }, 3000);
+    }, 1800); // Faster tick (was 3000ms)
 
     return () => {
       if (wanderTimerRef.current) {
@@ -364,13 +368,32 @@ function processEventInner(
       const sprite = engine.sprites.getSprite(event.data.agentId);
       if (!sprite) break;
 
+      const prevState = sprite.state;
+
       if (event.data.status === 'active') {
         engine.sprites.setState(event.data.agentId, 'typing');
+        // When transitioning from idle to active, walk back to home desk
+        if (prevState === 'idle' && sprite.path.length === 0) {
+          const assignment = assignments.get(event.data.agentId);
+          if (assignment && (sprite.tileX !== assignment.homeX || sprite.tileY !== assignment.homeY)) {
+            const path = engine.pathFinder.findPath(
+              sprite.tileX, sprite.tileY,
+              assignment.homeX, assignment.homeY,
+            );
+            if (path.length > 1) {
+              engine.sprites.setPath(event.data.agentId, path);
+            }
+          }
+        }
+        if (event.data.currentTask) {
+          engine.sprites.showSpeechBubble(event.data.agentId, 'task', 3000, event.data.currentTask);
+        }
       } else if (event.data.status === 'idle') {
         engine.sprites.setState(event.data.agentId, 'idle');
       } else if (event.data.status === 'error') {
         engine.sprites.setState(event.data.agentId, 'error');
         engine.addEffect(sprite.tileX, sprite.tileY, 'error');
+        engine.sprites.showSpeechBubble(event.data.agentId, 'blocker', 4000, '⚠ Error!');
       } else if (event.data.status === 'offline') {
         engine.sprites.setState(event.data.agentId, 'offline');
       }
@@ -381,13 +404,27 @@ function processEventInner(
       const fromSprite = engine.sprites.getSprite(event.data.from);
       if (fromSprite) {
         engine.sprites.setState(event.data.from, 'talking');
-        engine.sprites.showSpeechBubble(event.data.from, event.data.messageType, 4000);
+        const snippet = event.data.content?.slice(0, 30) || '';
+        engine.sprites.showSpeechBubble(event.data.from, event.data.messageType, 4000, snippet);
       }
 
       if (event.data.to) {
         const toSprite = engine.sprites.getSprite(event.data.to);
-        if (toSprite) {
+        if (toSprite && fromSprite) {
           engine.sprites.showSpeechBubble(event.data.to, event.data.messageType, 3000);
+          // Collaborating: move recipient toward sender
+          if (toSprite.path.length === 0) {
+            const path = engine.pathFinder.findPath(
+              toSprite.tileX, toSprite.tileY,
+              fromSprite.tileX, fromSprite.tileY,
+            );
+            if (path.length > 2) {
+              // Walk near the sender but not on top
+              engine.sprites.setPath(event.data.to, path.slice(0, -1));
+              engine.sprites.setEmotion(event.data.to, 'collaborating');
+              engine.sprites.setEmotion(event.data.from, 'collaborating');
+            }
+          }
         }
       }
       break;
@@ -436,6 +473,10 @@ function processEventInner(
       if (sprite) {
         engine.sprites.setState(event.data.agentId, 'typing');
         engine.addEffect(sprite.tileX, sprite.tileY, 'code');
+        engine.sprites.showSpeechBubble(
+          event.data.agentId, 'task', 3500,
+          event.data.description?.slice(0, 30) || event.data.filePath,
+        );
       }
       break;
     }

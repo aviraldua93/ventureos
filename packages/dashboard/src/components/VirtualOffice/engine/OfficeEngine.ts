@@ -384,6 +384,7 @@ export class OfficeEngine {
   private render(_dt: number) {
     const ctx = this.ctx;
     const cam = this.camera.state;
+    const now = performance.now();
 
     // Clear
     ctx.fillStyle = '#0a0e14';
@@ -412,35 +413,52 @@ export class OfficeEngine {
       ctx.save();
       ctx.translate(renderX, renderY);
 
-      // Animation offset
+      // Animation offset (continuous, time-based)
       const animY = this.getAnimOffset(sprite);
       ctx.translate(0, animY);
 
-      // Emotion glow ring
-      const glowColors: Record<string, string> = {
-        busy: '#ff5c5c',          // red for busy
-        thinking: '#a78bfa',      // purple pulse for thinking
-        frustrated: '#ff5c5c',    // red for error/frustrated
-        excited: '#ffb647',       // orange for excited
-        focused: '#3ddc84',       // green for active/focused
-        collaborating: '#4d9fff', // blue for collaborating
-        neutral: '#666677',       // subtle gray for idle
+      // ── Status glow ring (prominent, per-emotion) ──
+      const glowSpec: Record<string, { color: string; radius: number; baseAlpha: number; pulseRate: number }> = {
+        focused:       { color: '#3ddc84', radius: 16, baseAlpha: 0.45, pulseRate: 400 },
+        busy:          { color: '#3ddc84', radius: 16, baseAlpha: 0.40, pulseRate: 500 },
+        thinking:      { color: '#a78bfa', radius: 18, baseAlpha: 0.50, pulseRate: 250 },
+        collaborating: { color: '#4d9fff', radius: 17, baseAlpha: 0.45, pulseRate: 350 },
+        frustrated:    { color: '#ff5c5c', radius: 18, baseAlpha: 0.55, pulseRate: 150 },
+        excited:       { color: '#ffb647', radius: 16, baseAlpha: 0.45, pulseRate: 300 },
+        neutral:       { color: '#666677', radius: 13, baseAlpha: 0.18, pulseRate: 800 },
       };
-      const glow = glowColors[sprite.emotion] || null;
-      if (glow) {
-        const pulseRate = sprite.emotion === 'thinking' ? 300 : 500;
-        ctx.globalAlpha = sprite.emotion === 'neutral'
-          ? 0.12
-          : 0.25 + Math.sin(performance.now() / pulseRate) * 0.1;
-        ctx.fillStyle = glow;
+      const glow = glowSpec[sprite.emotion] ?? glowSpec.neutral;
+      const pulseAlpha = glow.baseAlpha + Math.sin(now / glow.pulseRate) * 0.15;
+      ctx.globalAlpha = Math.max(0.05, pulseAlpha);
+      ctx.fillStyle = glow.color;
+      ctx.beginPath();
+      ctx.arc(0, 0, glow.radius, 0, Math.PI * 2);
+      ctx.fill();
+      // Outer ring for active emotions
+      if (sprite.emotion !== 'neutral') {
+        ctx.strokeStyle = glow.color;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.3 + Math.sin(now / glow.pulseRate + 1) * 0.15;
         ctx.beginPath();
-        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.arc(0, 0, glow.radius + 3, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // ── Error flash overlay ──
+      if (sprite.state === 'error' || sprite.emotion === 'frustrated') {
+        const flash = Math.sin(now / 150) > 0 ? 0.3 : 0.05;
+        ctx.globalAlpha = flash;
+        ctx.fillStyle = '#ff5c5c';
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
       }
 
       // Body
-      const alpha = sprite.state === 'offline' ? 0.35 : 1;
+      const isIdle = sprite.state === 'idle' || sprite.state === 'offline';
+      const alpha = sprite.state === 'offline' ? 0.25 : isIdle && sprite.emotion === 'neutral' ? 0.6 : 1;
       ctx.globalAlpha = alpha;
 
       // Head
@@ -459,6 +477,21 @@ export class OfficeEngine {
       ctx.fill();
 
       ctx.globalAlpha = 1;
+
+      // ── "zzz" for idle agents ──
+      if (isIdle && sprite.emotion === 'neutral' && sprite.path.length === 0) {
+        const zPhase = now / 1000;
+        ctx.font = 'bold 7px monospace';
+        ctx.fillStyle = '#8899aa';
+        for (let i = 0; i < 3; i++) {
+          const zAlpha = 0.3 + Math.sin(zPhase + i * 0.8) * 0.3;
+          ctx.globalAlpha = Math.max(0.1, zAlpha);
+          const zx = 8 + i * 4;
+          const zy = -14 - i * 5 + Math.sin(zPhase * 1.5 + i) * 2;
+          ctx.fillText('z', zx, zy);
+        }
+        ctx.globalAlpha = 1;
+      }
 
       // Error mark
       if (sprite.state === 'error') {
@@ -494,28 +527,66 @@ export class OfficeEngine {
       ctx.textBaseline = 'top';
       ctx.fillText((sprite.name ?? '').split(' ')[0] || '?', 0, 12);
 
-      // Speech bubble
+      // ── Speech bubble with text snippet ──
       if (sprite.speechBubble) {
         const bubbleColors: Record<string, string> = {
           chat: '#e8edf4', blocker: '#ff5c5c', review: '#ffb647', task: '#4d9fff',
         };
         const bg = bubbleColors[sprite.speechBubble.type] ?? '#e8edf4';
-        ctx.fillStyle = bg;
-        this.roundRect(ctx, -12, -28, 24, 14, 4);
-        ctx.fill();
-        // Tail
-        ctx.beginPath();
-        ctx.moveTo(-3, -14);
-        ctx.lineTo(0, -8);
-        ctx.lineTo(3, -14);
-        ctx.fill();
-        // Dots
-        const dotColor = sprite.speechBubble.type === 'chat' ? '#556677' : '#ffffff';
-        ctx.fillStyle = dotColor;
-        for (let i = 0; i < 3; i++) {
-          ctx.beginPath();
-          ctx.arc(-6 + i * 6, -21, 1.5, 0, Math.PI * 2);
+        const text = sprite.speechBubble.text;
+
+        if (text) {
+          // Show truncated text in bubble
+          const maxChars = 18;
+          const display = text.length > maxChars ? text.slice(0, maxChars - 1) + '…' : text;
+          ctx.font = '6px monospace';
+          const textWidth = Math.min(ctx.measureText(display).width + 8, 80);
+          const bubbleW = Math.max(textWidth, 24);
+          const bubbleH = 16;
+          const bx = -bubbleW / 2;
+          const by = -32;
+
+          // Fade in/out
+          const life = sprite.speechTimer / (sprite.speechBubble.timer || 1);
+          ctx.globalAlpha = Math.min(1, life * 3) * Math.min(1, sprite.speechTimer / 500);
+
+          ctx.fillStyle = bg;
+          this.roundRect(ctx, bx, by, bubbleW, bubbleH, 4);
           ctx.fill();
+          // Tail
+          ctx.beginPath();
+          ctx.moveTo(-3, by + bubbleH);
+          ctx.lineTo(0, by + bubbleH + 6);
+          ctx.lineTo(3, by + bubbleH);
+          ctx.fill();
+          // Text
+          const textColor = sprite.speechBubble.type === 'chat' ? '#1e2a38' : '#ffffff';
+          ctx.fillStyle = textColor;
+          ctx.font = '6px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(display, 0, by + bubbleH / 2);
+          ctx.globalAlpha = 1;
+        } else {
+          // Fallback: animated dots
+          ctx.fillStyle = bg;
+          this.roundRect(ctx, -12, -28, 24, 14, 4);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(-3, -14);
+          ctx.lineTo(0, -8);
+          ctx.lineTo(3, -14);
+          ctx.fill();
+          const dotColor = sprite.speechBubble.type === 'chat' ? '#556677' : '#ffffff';
+          ctx.fillStyle = dotColor;
+          for (let i = 0; i < 3; i++) {
+            const dotAlpha = 0.4 + Math.sin(now / 300 + i * 1.2) * 0.4;
+            ctx.globalAlpha = dotAlpha;
+            ctx.beginPath();
+            ctx.arc(-6 + i * 6, -21, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
         }
       }
 
@@ -523,7 +594,6 @@ export class OfficeEngine {
     }
 
     // Draw effects
-    const now = performance.now();
     this.effects = this.effects.filter(e => now - e.startTime < e.duration);
     for (const effect of this.effects) {
       const age = (now - effect.startTime) / effect.duration;
@@ -545,11 +615,14 @@ export class OfficeEngine {
   }
 
   private getAnimOffset(sprite: { state: string; animFrame: number }): number {
+    const t = performance.now() / 1000;
+    const id = sprite.animFrame; // use as phase offset
     switch (sprite.state) {
-      case 'idle': return Math.sin(sprite.animFrame * Math.PI / 2) * 1;
-      case 'walking': return -Math.abs(Math.sin(sprite.animFrame * Math.PI / 2)) * 2;
-      case 'typing': return 0;
-      case 'talking': return Math.sin(sprite.animFrame * Math.PI / 2) * 1.5;
+      case 'idle': return Math.sin(t * 1.5 + id) * 2.5;
+      case 'walking': return -Math.abs(Math.sin(t * 8 + id)) * 3;
+      case 'typing': return Math.sin(t * 3 + id) * 1.2;
+      case 'talking': return Math.sin(t * 4 + id) * 2;
+      case 'error': return Math.sin(t * 10) * 1.5;
       default: return 0;
     }
   }

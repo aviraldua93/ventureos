@@ -10,6 +10,7 @@ export type EmotionState = 'neutral' | 'busy' | 'thinking' | 'frustrated' | 'exc
 export interface SpeechBubbleData {
   type: string;
   timer: number;
+  text?: string;
 }
 
 export interface AgentSprite {
@@ -113,10 +114,10 @@ export class SpriteManager {
     }
   }
 
-  showSpeechBubble(agentId: string, messageType: string, duration = 3000) {
+  showSpeechBubble(agentId: string, messageType: string, duration = 3000, text?: string) {
     const sprite = this.sprites.get(agentId);
     if (!sprite) return;
-    sprite.speechBubble = { type: messageType, timer: duration };
+    sprite.speechBubble = { type: messageType, timer: duration, text };
     sprite.speechTimer = duration;
   }
 
