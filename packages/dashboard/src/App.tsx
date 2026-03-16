@@ -4,6 +4,7 @@ import { OrgChart } from './components/OrgChart';
 import { MessageStream } from './components/MessageStream';
 import { TaskBoard } from './components/TaskBoard';
 import { CodeDiffView } from './components/CodeDiffView';
+import { AgentDetail } from './components/AgentDetail';
 import './App.css';
 
 export default function App() {
@@ -40,6 +41,9 @@ export default function App() {
           <CodeDiffView />
         </aside>
       </main>
+
+      {/* Agent detail slide-out panel */}
+      <AgentDetail />
 
       {/* Status bar */}
       <footer className="status-bar">

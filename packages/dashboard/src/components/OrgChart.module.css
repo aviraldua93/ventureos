@@ -1,0 +1,131 @@
+.container {
+  padding: 12px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.header {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #e0e0e0;
+}
+
+.empty {
+  color: #888;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 32px 12px;
+}
+
+.tree {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subtree {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.children {
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 1px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #16213e;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  min-width: 0;
+}
+
+.card:hover {
+  border-color: #0f3460;
+  background: #1a2744;
+}
+
+.cardSelected {
+  border-color: #4a8fe7;
+  background: #1a2744;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.dotActive {
+  background-color: #22c55e;
+  box-shadow: 0 0 6px #22c55e80;
+}
+
+.dotIdle {
+  background-color: #eab308;
+  box-shadow: 0 0 6px #eab30880;
+}
+
+.dotError {
+  background-color: #ef4444;
+  box-shadow: 0 0 6px #ef444480;
+}
+
+.dotOffline {
+  background-color: #6b7280;
+  box-shadow: none;
+}
+
+.info {
+  min-width: 0;
+  flex: 1;
+}
+
+.nameRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  white-space: nowrap;
+}
+
+.role {
+  font-size: 0.75rem;
+  color: #8899aa;
+  white-space: nowrap;
+}
+
+.task {
+  font-size: 0.75rem;
+  color: #aab;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heartbeat {
+  font-size: 0.65rem;
+  color: #667;
+  margin-top: 2px;
+}
