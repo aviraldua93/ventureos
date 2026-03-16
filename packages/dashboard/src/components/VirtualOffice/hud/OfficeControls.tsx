@@ -38,12 +38,12 @@ export function OfficeControls({ engine, agents }: OfficeControlsProps) {
   }, [engine]);
 
   return (
-    <div className={css.controls}>
-      <button className={css.controlBtn} onClick={zoomIn} title="Zoom In">+</button>
-      <button className={css.controlBtn} onClick={zoomOut} title="Zoom Out">−</button>
-      <button className={css.controlBtn} onClick={resetView} title="Reset View">⌂</button>
+    <div className={css.controls} data-testid="office-controls">
+      <button className={css.controlBtn} onClick={zoomIn} title="Zoom In" aria-label="Zoom in" data-testid="office-zoom-in">+</button>
+      <button className={css.controlBtn} onClick={zoomOut} title="Zoom Out" aria-label="Zoom out" data-testid="office-zoom-out">−</button>
+      <button className={css.controlBtn} onClick={resetView} title="Reset View" aria-label="Reset view" data-testid="office-reset-view">⌂</button>
       <div className={css.separator} />
-      <select className={css.followSelect} onChange={handleFollow} defaultValue="" title="Follow Agent">
+      <select className={css.followSelect} onChange={handleFollow} defaultValue="" title="Follow Agent" aria-label="Follow agent" data-testid="office-follow-select">
         <option value="">👁 Free</option>
         {agents.map(a => (
           <option key={a.id} value={a.id}>{(a.name ?? a.id).split(' ')[0]}</option>

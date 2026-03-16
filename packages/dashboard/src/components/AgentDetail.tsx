@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVentureStore } from '../store';
 import { Badge } from './ui';
@@ -121,6 +121,15 @@ export function AgentDetail() {
 
   const handleClose = useCallback(() => setSelectedAgentId(null), [setSelectedAgentId]);
 
+  useEffect(() => {
+    if (!selectedAgentId) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [selectedAgentId, handleClose]);
+
   if (!selectedAgentId) return null;
 
   return (
@@ -137,6 +146,7 @@ export function AgentDetail() {
           />
           <motion.div
             className={css.panel}
+            data-testid="agent-detail-panel"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}

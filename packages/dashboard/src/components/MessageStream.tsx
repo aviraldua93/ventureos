@@ -105,16 +105,18 @@ export function MessageStream() {
   }, []);
 
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid="message-stream">
       <div className={css.header}>
         <span className={css.title}>Activity</span>
         <span className={css.messageCount}>{filteredMessages.length}</span>
-        <div className={css.filters}>
+        <div className={css.filters} data-testid="message-filters">
           {FILTER_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               className={`${css.filterBtn} ${filter === opt.value ? css.filterBtnActive : ''}`}
               onClick={() => setFilter(opt.value)}
+              aria-label={`Filter by ${opt.label}`}
+              data-testid={`message-filter-${opt.value}`}
             >
               {opt.label}
             </button>
@@ -184,6 +186,8 @@ export function MessageStream() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
                 transition={{ duration: 0.15 }}
+                aria-label="Scroll to new messages"
+                data-testid="message-scroll-btn"
               >
                 ↓ New messages
               </motion.button>

@@ -39,7 +39,7 @@ export function AgentListPanel() {
   );
 
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid="agent-list-panel">
       <div className={css.header}>
         <span className={css.headerLabel}>Agents</span>
         {agents.length > 0 && <span className={css.headerCount}>{agents.length}</span>}
@@ -79,6 +79,8 @@ export function AgentListPanel() {
               onClick={() => select(agent.id)}
               role="button"
               tabIndex={0}
+              data-testid={`agent-row-${agent.id}`}
+              aria-label={`${agent.name}, ${agent.role}, ${agent.status}`}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();

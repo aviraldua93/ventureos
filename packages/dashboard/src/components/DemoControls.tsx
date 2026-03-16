@@ -86,10 +86,10 @@ export function DemoControls() {
 
       <div className={css.controls} data-testid="demo-controls">
         <div className={css.left}>
-          <Button variant="ghost" size="sm" onClick={handlePlayPause}>
+          <Button variant="ghost" size="sm" onClick={handlePlayPause} aria-label={playIcon === '⏸' ? 'Pause demo' : 'Play demo'} data-testid="demo-play-pause">
             {playIcon}
           </Button>
-          <Button variant="ghost" size="sm" onClick={handleRestart}>
+          <Button variant="ghost" size="sm" onClick={handleRestart} aria-label="Restart demo" data-testid="demo-restart">
             ↺
           </Button>
         </div>
@@ -115,6 +115,8 @@ export function DemoControls() {
               size="sm"
               className={status.speed === s ? css.speedActive : undefined}
               onClick={() => handleSpeed(s)}
+              aria-label={`Set speed ${s}x`}
+              data-testid={`demo-speed-${s}`}
             >
               {s}×
             </Button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Agent, Task } from '@ventureos/shared';
 import type { Creature } from '../engine/creatures';
 import { SPECIES_META } from '../engine/creatures';
@@ -16,6 +16,15 @@ interface CreaturePanelProps {
 export function CreaturePanel({ creature, agent, tasks, onPet, onClose }: CreaturePanelProps) {
   const [feedInput, setFeedInput] = useState('');
 
+  useEffect(() => {
+    if (!creature || !agent) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [creature, agent, onClose]);
+
   if (!creature || !agent) return null;
 
   const mood = computeMood(agent, tasks);
@@ -26,7 +35,7 @@ export function CreaturePanel({ creature, agent, tasks, onPet, onClose }: Creatu
   const completedTasks = agentTasks.filter(t => t.status === 'done');
 
   return (
-    <div className={css.creaturePanel}>
+    <div className={css.creaturePanel} data-testid="creature-panel">
       <div className={css.creaturePanelHeader} style={{ borderBottomColor: moodColors.primary }}>
         <div className={css.creaturePanelTitle}>
           <span className={css.creatureSpeciesBadge} style={{ background: moodColors.bg, color: moodColors.primary }}>
@@ -35,7 +44,7 @@ export function CreaturePanel({ creature, agent, tasks, onPet, onClose }: Creatu
           <h3 className={css.creatureName}>{agent.name}</h3>
           <span className={css.creatureRole}>{agent.role}</span>
         </div>
-        <button className={css.creaturePanelClose} onClick={onClose}>✕</button>
+        <button className={css.creaturePanelClose} onClick={onClose} aria-label="Close creature panel" data-testid="creature-panel-close">✕</button>
       </div>
 
       {/* Mood Status */}
@@ -88,6 +97,8 @@ export function CreaturePanel({ creature, agent, tasks, onPet, onClose }: Creatu
           className={css.creatureActionBtn}
           onClick={() => onPet(creature.id)}
           title="Acknowledge good work!"
+          aria-label="Pet creature"
+          data-testid="creature-pet-btn"
         >
           💛 Pet
         </button>
@@ -97,6 +108,8 @@ export function CreaturePanel({ creature, agent, tasks, onPet, onClose }: Creatu
             placeholder="Feed a task…"
             value={feedInput}
             onChange={e => setFeedInput(e.target.value)}
+            aria-label="Feed task input"
+            data-testid="creature-feed-input"
             onKeyDown={e => {
               if (e.key === 'Enter' && feedInput.trim()) {
                 // In a real app this would create a task via the API
@@ -107,6 +120,8 @@ export function CreaturePanel({ creature, agent, tasks, onPet, onClose }: Creatu
           <button
             className={css.creatureActionBtn}
             disabled={!feedInput.trim()}
+            aria-label="Feed creature"
+            data-testid="creature-feed-btn"
             onClick={() => {
               if (feedInput.trim()) setFeedInput('');
             }}

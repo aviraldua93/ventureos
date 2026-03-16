@@ -70,7 +70,7 @@ export function TaskBoard() {
   }, [tasks]);
 
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid="task-board">
       <div className={css.header}>
         <h2 className={css.heading}>Tasks</h2>
         <span className={css.taskCount}>{tasks.length}</span>
@@ -109,7 +109,7 @@ export function TaskBoard() {
                           exit={{ opacity: 0, y: -4 }}
                           transition={{ duration: 0.12 }}
                         >
-                          <div className={css.taskCard}>
+                          <div className={css.taskCard} data-testid={`task-card-${task.id}`}>
                             <div className={css.cardBody}>
                               <span className={css.cardTitle}>{task.title}</span>
                               <span

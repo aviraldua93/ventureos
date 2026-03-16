@@ -70,7 +70,7 @@ export function CodeDiffView() {
 
   if (sorted.length === 0) {
     return (
-      <div className={css.container}>
+      <div className={css.container} data-testid="code-diff-view">
         <h2 className={css.heading}>Code Changes</h2>
         <div className={css.emptyState}>
           <p className={css.emptyText}>No code changes yet</p>
@@ -80,7 +80,7 @@ export function CodeDiffView() {
   }
 
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid="code-diff-view">
       <h2 className={css.heading}>
         Code Changes
         <span className={css.countBadge}>{sorted.length}</span>
@@ -98,6 +98,8 @@ export function CodeDiffView() {
               key={change.id}
               className={`${css.changeItem} ${isActive ? css.changeItemActive : ''}`}
               onClick={() => handleSelect(change.id)}
+              data-testid={`code-change-${change.id}`}
+              aria-label={`Code change: ${change.filePath}`}
             >
               <div className={css.changeFilePath}>{change.filePath}</div>
               <div className={css.changeDesc}>{change.description}</div>

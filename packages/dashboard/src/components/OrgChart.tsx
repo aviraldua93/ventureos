@@ -75,6 +75,8 @@ function OrgNodeCard({ node, selectedId, onSelect, collapsedSet, onToggle }: Nod
       <button
         className={`${css.card} ${isSelected ? css.cardSelected : ''}`}
         onClick={() => onSelect(agent.id)}
+        data-testid={`org-card-${agent.id}`}
+        aria-label={`${agent.name}, ${agent.role}`}
       >
         <div className={css.cardTop}>
           <span
@@ -205,7 +207,10 @@ export function OrgChart() {
               placeholder="Filter agents..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') setQuery(''); }}
               spellCheck={false}
+              data-testid="org-search-input"
+              aria-label="Filter agents"
             />
             {query && (
               <button className={css.searchClear} onClick={() => setQuery('')} aria-label="Clear">
