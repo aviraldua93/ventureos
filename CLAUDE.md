@@ -30,6 +30,8 @@ Every agent deployment MUST include the appropriate role file from `.claude/role
 |------|------|-----|
 | COO | `.claude/roles/coo.md` | Max |
 | CEO | `.claude/roles/ceo.md` | Jordan Park |
+| VP Product Management | `.claude/roles/vp-pm.md` | Dana Whitfield |
+| PM (IC) | `.claude/roles/pm.md` | Leo Tanaka, Iris Oduya |
 | Sprint Lead | `.claude/roles/sprint-lead.md` | Marc Delacroix |
 | VP | `.claude/roles/vp.md` | Sana, Lex, Noor, Ava |
 | IC | `.claude/roles/ic.md` | All engineers, designers, testers, writers |

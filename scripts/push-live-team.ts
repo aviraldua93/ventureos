@@ -70,8 +70,13 @@ const team: Agent[] = [
   { agentId: 'ren-kowalski', name: 'Ren Kowalski', role: 'Dev Relations, VentureOS', parentId: 'ava-chen', capabilities: ['devrel', 'demos', 'outreach'] },
   { agentId: 'maya-patel', name: 'Maya Patel', role: 'Content Engineer, VentureOS', parentId: 'ava-chen', capabilities: ['content', 'docs', 'writing'] },
 
+  // VentureOS — Product Management
+  { agentId: 'dana-whitfield', name: 'Dana Whitfield', role: 'VP Product Management, VentureOS', parentId: 'jordan-park', capabilities: ['delivery', 'sprint-cadence', 'phase-transitions', 'cross-team-coordination'] },
+  { agentId: 'marc-delacroix', name: 'Marc Delacroix', role: 'Sprint Lead, VentureOS', parentId: 'dana-whitfield', capabilities: ['sprint-planning', 'execution', 'tracking'] },
+  { agentId: 'leo-tanaka', name: 'Leo Tanaka', role: 'Program Manager, VentureOS', parentId: 'dana-whitfield', capabilities: ['dependency-tracking', 'timelines', 'standups', 'cross-team-coordination'] },
+  { agentId: 'iris-oduya', name: 'Iris Oduya', role: 'Technical PM, VentureOS', parentId: 'dana-whitfield', capabilities: ['specs', 'requirements', 'acceptance-criteria', 'prds'] },
+
   // VentureOS — Sprint 3 UX + Frontend
-  { agentId: 'marc-delacroix', name: 'Marc Delacroix', role: 'Sprint Lead, VentureOS', parentId: 'jordan-park', capabilities: ['sprint-planning', 'execution', 'tracking'] },
   { agentId: 'sana-matsuda', name: 'Sana Matsuda', role: 'UX Designer, VentureOS', parentId: 'sana-okafor', capabilities: ['ux', 'design-systems', 'figma'] },
   { agentId: 'elena-volkov', name: 'Elena Volkov', role: 'UX Designer, VentureOS', parentId: 'sana-okafor', capabilities: ['ux', 'layout', 'navigation'] },
   { agentId: 'ravi-krishnamurthy', name: 'Ravi Krishnamurthy', role: 'UX Designer, VentureOS', parentId: 'sana-okafor', capabilities: ['ux', 'interaction-design', 'responsive'] },
@@ -129,6 +134,9 @@ const heartbeats: Heartbeat[] = [
   // Sprint 3 + Playwright teams
   { agentId: 'maya-patel', status: 'active', currentTask: 'Sprint 3 documentation' },
   { agentId: 'marc-delacroix', status: 'active', currentTask: 'Sprint 3 kickoff' },
+  { agentId: 'dana-whitfield', status: 'active', currentTask: 'Establishing delivery cadence and phase transition protocols' },
+  { agentId: 'leo-tanaka', status: 'active', currentTask: 'Mapping cross-team dependencies for Sprint 3' },
+  { agentId: 'iris-oduya', status: 'active', currentTask: 'Writing Phase 1 feature specs and acceptance criteria' },
   { agentId: 'sana-matsuda', status: 'active', currentTask: 'Design system refinement' },
   { agentId: 'elena-volkov', status: 'active', currentTask: 'Dashboard shell layout' },
   { agentId: 'ravi-krishnamurthy', status: 'active', currentTask: 'Interaction patterns' },
@@ -224,6 +232,11 @@ const messages: Message[] = [
   { from: 'jordan-park', content: "Docs ownership: Ava Chen's team (Jules, Maya) owns all documentation going forward. Engineering writes code, Community writes docs.", messageType: 'task' },
   { from: 'jordan-park', content: "E2E ownership: Riley Nakamura's Playwright track owns all e2e tests. Lex's QA team owns manual QA, test plans, and sign-off. Sam Torres bridges both — he reports to Lex but coordinates with Riley.", messageType: 'task' },
   { from: 'jordan-park', content: 'Phase 1 is NOW. Marc is driving. All VPs: deploy your ICs today.', messageType: 'task' },
+  // VP PM org acknowledgments
+  { from: 'dana-whitfield', content: "VP Product Management reporting in. I own delivery timelines, phase transitions, and sprint cadence. Marc, Leo, Iris — you report to me. Let's establish our rhythm: daily standups at 9 AM, phase reviews every 48 hours. Nothing sits idle on my watch.", messageType: 'task' },
+  { from: 'leo-tanaka', content: "Program Manager online. I've got the cross-team dependency map started — Engineering ↔ QA ↔ Playwright handoffs are my priority. Running first standup tomorrow at 9 AM sharp. All leads, have your blockers ready.", messageType: 'task' },
+  { from: 'iris-oduya', content: "Technical PM here. Starting with Phase 1 specs — acceptance criteria for MessageStream, TaskBoard, AgentDetail, and CodeDiffView redesigns. Engineers, you'll have testable requirements before you write a line of code. No ambiguity.", messageType: 'task' },
+  { from: 'dana-whitfield', content: "Marc, I need Phase 1 status by EOD. Leo, map every cross-team dependency. Iris, specs for all Phase 1 deliverables by tomorrow morning. We ship on time or we know exactly why we didn't.", messageType: 'task' },
 ];
 
 console.log('💬 Pushing messages...');
@@ -274,6 +287,9 @@ const tasks: Task[] = [
   { taskId: 'p2-pixijs-scene', title: 'Time-Travel Office: Pixi.js Scene + Sprites', status: 'in_progress', assigneeId: 'kenji-ohara', description: 'Set up Pixi.js canvas scene, create pixel art character sprites for all agents' },
   { taskId: 'p2-animation-system', title: 'Time-Travel Office: Animation + Timeline Scrubber', status: 'in_progress', assigneeId: 'mia-chen', description: 'Build animation system for agent movements, timeline scrubber for event replay' },
   { taskId: 'sprint3-lead', title: 'Sprint Lead: Phase 1 + Phase 2 Tracking', status: 'in_progress', assigneeId: 'marc-delacroix', description: 'Drive Sprint 3 execution — track Phase 1 deliverables, coordinate Phase 2 kickoff' },
+  { taskId: 'vp-pm-cadence', title: 'Establish Delivery Cadence', status: 'in_progress', assigneeId: 'dana-whitfield', description: 'Set up daily standups, phase transition protocols, and VP deployment tracking' },
+  { taskId: 'pm-dependency-map', title: 'Cross-Team Dependency Map', status: 'in_progress', assigneeId: 'leo-tanaka', description: 'Map all cross-team dependencies for Sprint 3 — Engineering, QA, Playwright, Community handoffs' },
+  { taskId: 'pm-phase1-specs', title: 'Phase 1 Feature Specs & Acceptance Criteria', status: 'in_progress', assigneeId: 'iris-oduya', description: 'Write testable specs and acceptance criteria for all Phase 1 deliverables — MessageStream, TaskBoard, AgentDetail, CodeDiffView' },
   { taskId: 'pw-dashboard-routes', title: 'Expand Playwright Tests: Dashboard Routes', status: 'in_progress', assigneeId: 'riley-nakamura', description: 'Expand Playwright test coverage to all dashboard routes including new Phase 1 components' },
   { taskId: 'pw-orgchart-msg-task', title: 'E2E Tests: OrgChart, MessageStream, TaskBoard', status: 'in_progress', assigneeId: 'sam-okonkwo', description: 'Write Playwright e2e tests for OrgChart, MessageStream, and TaskBoard components' },
   { taskId: 'pw-codediff-agent-demo', title: 'E2E Tests: CodeDiffView, AgentDetail, DemoControls', status: 'in_progress', assigneeId: 'casey-lin', description: 'Write Playwright e2e tests for CodeDiffView, AgentDetail, and DemoControls' },
