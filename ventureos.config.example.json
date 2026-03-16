@@ -1,0 +1,57 @@
+{
+  "$schema": "./ventureos.config.schema.json",
+  "company": {
+    "name": "Acme Corp",
+    "tagline": "Building the Future with AI Agents",
+    "branding": {
+      "primaryColor": "#2563eb",
+      "secondaryColor": "#7c3aed",
+      "accentColor": "#16a34a"
+    }
+  },
+  "teams": [
+    {
+      "name": "leadership",
+      "displayName": "Leadership",
+      "color": "#2563eb",
+      "icon": "crown",
+      "roomType": "corner_office"
+    },
+    {
+      "name": "engineering",
+      "displayName": "Engineering",
+      "color": "#3b82f6",
+      "icon": "code",
+      "roomType": "open_office"
+    },
+    {
+      "name": "design",
+      "displayName": "Design",
+      "color": "#ec4899",
+      "icon": "palette",
+      "roomType": "open_office"
+    },
+    {
+      "name": "qa",
+      "displayName": "Quality Assurance",
+      "color": "#10b981",
+      "icon": "shield-check",
+      "roomType": "open_office"
+    }
+  ],
+  "agents": [
+    { "id": "alice", "name": "Alice Zhang", "role": "CEO", "team": "leadership", "capabilities": ["strategy", "leadership"] },
+    { "id": "bob", "name": "Bob Martinez", "role": "CTO", "team": "leadership", "parentId": "alice", "capabilities": ["engineering", "architecture"] },
+
+    { "id": "charlie", "name": "Charlie Kim", "role": "Lead Engineer", "team": "engineering", "parentId": "bob", "capabilities": ["backend", "api"], "isLead": true },
+    { "id": "diana", "name": "Diana Osei", "role": "Frontend Engineer", "team": "engineering", "parentId": "charlie", "capabilities": ["react", "typescript"] },
+    { "id": "evan", "name": "Evan Reyes", "role": "Backend Engineer", "team": "engineering", "parentId": "charlie", "capabilities": ["python", "databases"] },
+
+    { "id": "fiona", "name": "Fiona Li", "role": "Design Lead", "team": "design", "parentId": "bob", "capabilities": ["ux", "figma"], "isLead": true },
+    { "id": "george", "name": "George Tanaka", "role": "UI Designer", "team": "design", "parentId": "fiona", "capabilities": ["ui", "css"] },
+
+    { "id": "hannah", "name": "Hannah Patel", "role": "QA Lead", "team": "qa", "parentId": "bob", "capabilities": ["testing", "automation"], "isLead": true },
+    { "id": "ivan", "name": "Ivan Novak", "role": "QA Engineer", "team": "qa", "parentId": "hannah", "capabilities": ["e2e", "manual-qa"] }
+  ],
+  "rooms": []
+}

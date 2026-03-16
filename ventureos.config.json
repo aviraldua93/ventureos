@@ -1,0 +1,115 @@
+{
+  "$schema": "./ventureos.config.schema.json",
+  "company": {
+    "name": "VentureOS",
+    "tagline": "Mission Control for AI Agent Teams",
+    "branding": {
+      "primaryColor": "#6366f1",
+      "secondaryColor": "#8b5cf6",
+      "accentColor": "#f59e0b"
+    }
+  },
+  "teams": [
+    {
+      "name": "leadership",
+      "displayName": "Leadership",
+      "color": "#6366f1",
+      "icon": "crown",
+      "roomType": "corner_office"
+    },
+    {
+      "name": "holding",
+      "displayName": "Holding Co.",
+      "color": "#8b5cf6",
+      "icon": "building",
+      "roomType": "corner_office"
+    },
+    {
+      "name": "engineering",
+      "displayName": "Engineering",
+      "color": "#3b82f6",
+      "icon": "code",
+      "roomType": "open_office"
+    },
+    {
+      "name": "qa",
+      "displayName": "Quality Assurance",
+      "color": "#10b981",
+      "icon": "shield-check",
+      "roomType": "open_office"
+    },
+    {
+      "name": "ai",
+      "displayName": "AI Research",
+      "color": "#f59e0b",
+      "icon": "cpu",
+      "roomType": "server_room"
+    },
+    {
+      "name": "community",
+      "displayName": "Community",
+      "color": "#ec4899",
+      "icon": "users",
+      "roomType": "open_office"
+    },
+    {
+      "name": "product",
+      "displayName": "Product Management",
+      "color": "#14b8a6",
+      "icon": "clipboard",
+      "roomType": "open_office"
+    },
+    {
+      "name": "playwright",
+      "displayName": "Playwright",
+      "color": "#f97316",
+      "icon": "test-tube",
+      "roomType": "open_office"
+    }
+  ],
+  "agents": [
+    { "id": "max", "name": "Max", "role": "COO", "team": "holding", "capabilities": ["operations", "strategy"] },
+    { "id": "niko-reyes", "name": "Niko Reyes", "role": "Scout Lead", "team": "holding", "capabilities": ["scouting", "deal-flow"] },
+    { "id": "priya-sharma", "name": "Priya Sharma", "role": "CEO, ArchitectAI", "team": "holding", "capabilities": ["leadership", "architecture"] },
+
+    { "id": "jordan-park", "name": "Jordan Park", "role": "CEO", "team": "leadership", "capabilities": ["leadership", "product", "strategy"] },
+
+    { "id": "sana-okafor", "name": "Sana Okafor", "role": "VP Engineering", "team": "engineering", "parentId": "jordan-park", "capabilities": ["engineering", "architecture", "management"], "isLead": true },
+    { "id": "mia-torres", "name": "Mia Torres", "role": "Frontend Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["react", "typescript", "css"] },
+    { "id": "ravi-patel", "name": "Ravi Patel", "role": "Frontend Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["react", "typescript", "documentation"] },
+    { "id": "zoe-chen", "name": "Zoe Chen", "role": "Frontend Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["react", "typescript", "vite"] },
+    { "id": "kai-nakamura", "name": "Kai Nakamura", "role": "Backend Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["bun", "typescript", "api"] },
+    { "id": "marcus-webb", "name": "Marcus Webb", "role": "DevOps Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["devops", "ci-cd", "infrastructure"] },
+    { "id": "sana-matsuda", "name": "Sana Matsuda", "role": "UX Designer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["ux", "design-systems", "figma"] },
+    { "id": "elena-volkov", "name": "Elena Volkov", "role": "UX Designer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["ux", "layout", "navigation"] },
+    { "id": "ravi-krishnamurthy", "name": "Ravi Krishnamurthy", "role": "UX Designer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["ux", "interaction-design", "responsive"] },
+    { "id": "lena-park", "name": "Lena Park", "role": "Frontend Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["react", "typescript", "components"] },
+    { "id": "devon-achebe", "name": "Devon Achebe", "role": "Frontend Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["react", "typescript", "navigation"] },
+    { "id": "tomas-herrera", "name": "Tomás Herrera", "role": "Frontend Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["react", "typescript", "theming"] },
+    { "id": "kenji-ohara", "name": "Kenji Ohara", "role": "Pixel Art Specialist", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["pixel-art", "pixi-js", "sprites"] },
+    { "id": "mia-chen", "name": "Mia Chen", "role": "Motion Engineer", "team": "engineering", "parentId": "sana-okafor", "capabilities": ["animation", "pixi-js", "timeline"] },
+
+    { "id": "lex-morales", "name": "Lex Morales", "role": "VP Quality", "team": "qa", "parentId": "jordan-park", "capabilities": ["qa", "testing", "standards"], "isLead": true },
+    { "id": "priya-desai", "name": "Priya Desai", "role": "QA Functional", "team": "qa", "parentId": "lex-morales", "capabilities": ["functional-testing", "manual-qa"] },
+    { "id": "sam-torres", "name": "Sam Torres", "role": "QA Integration", "team": "qa", "parentId": "lex-morales", "capabilities": ["integration-testing", "e2e"] },
+
+    { "id": "noor-abbasi", "name": "Noor Abbasi", "role": "VP AI/LLM", "team": "ai", "parentId": "jordan-park", "capabilities": ["ai", "llm", "ml-ops"], "isLead": true },
+    { "id": "eli-vance", "name": "Eli Vance", "role": "Agentic Systems", "team": "ai", "parentId": "noor-abbasi", "capabilities": ["agents", "llm", "autonomy"] },
+
+    { "id": "ava-chen", "name": "Ava Chen", "role": "VP Community", "team": "community", "parentId": "jordan-park", "capabilities": ["community", "growth", "partnerships"], "isLead": true },
+    { "id": "jules-rivera", "name": "Jules Rivera", "role": "Technical Writer", "team": "community", "parentId": "ava-chen", "capabilities": ["docs", "writing", "tutorials"] },
+    { "id": "ren-kowalski", "name": "Ren Kowalski", "role": "Dev Relations", "team": "community", "parentId": "ava-chen", "capabilities": ["devrel", "demos", "outreach"] },
+    { "id": "maya-patel", "name": "Maya Patel", "role": "Content Engineer", "team": "community", "parentId": "ava-chen", "capabilities": ["content", "docs", "writing"] },
+
+    { "id": "dana-whitfield", "name": "Dana Whitfield", "role": "VP Product Management", "team": "product", "parentId": "jordan-park", "capabilities": ["delivery", "sprint-cadence", "phase-transitions", "cross-team-coordination"], "isLead": true },
+    { "id": "marc-delacroix", "name": "Marc Delacroix", "role": "Sprint Lead", "team": "product", "parentId": "dana-whitfield", "capabilities": ["sprint-planning", "execution", "tracking"] },
+    { "id": "leo-tanaka", "name": "Leo Tanaka", "role": "Program Manager", "team": "product", "parentId": "dana-whitfield", "capabilities": ["dependency-tracking", "timelines", "standups", "cross-team-coordination"] },
+    { "id": "iris-oduya", "name": "Iris Oduya", "role": "Technical PM", "team": "product", "parentId": "dana-whitfield", "capabilities": ["specs", "requirements", "acceptance-criteria", "prds"] },
+
+    { "id": "riley-nakamura", "name": "Riley Nakamura", "role": "Playwright Lead", "team": "playwright", "parentId": "jordan-park", "capabilities": ["playwright", "e2e", "test-architecture"], "isLead": true },
+    { "id": "sam-okonkwo", "name": "Sam Okonkwo", "role": "Automation Engineer", "team": "playwright", "parentId": "riley-nakamura", "capabilities": ["playwright", "automation", "e2e"] },
+    { "id": "casey-lin", "name": "Casey Lin", "role": "Automation Engineer", "team": "playwright", "parentId": "riley-nakamura", "capabilities": ["playwright", "automation", "e2e"] },
+    { "id": "alex-petrov", "name": "Alex Petrov", "role": "Browser Infra Engineer", "team": "playwright", "parentId": "riley-nakamura", "capabilities": ["chromium", "browser-infra", "playwright"] }
+  ],
+  "rooms": []
+}

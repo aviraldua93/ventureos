@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
-// orchestration-bridge.ts — Bridge between Max's agent orchestration and the Virtual Office
+// orchestration-bridge.ts — Bridge between agent orchestration and the Virtual Office
 //
-// When Max deploys agents (e.g., Riley's Playwright team), this script pushes
-// coordinated events so the VO dashboard reflects REAL activity — agents light up,
-// move to their rooms, show active status, and display what they're working on.
+// Reads team/agent definitions from ventureos.config.json instead of hardcoded data.
+// When agents are deployed, this script pushes coordinated events so the VO dashboard
+// reflects REAL activity — agents light up, move to rooms, show active status.
 //
 // Usage:
 //   bun run scripts/orchestration-bridge.ts deploy-agent <agent-id> --task "description"
@@ -11,19 +11,15 @@
 //   bun run scripts/orchestration-bridge.ts deploy-team <team-name> --task "description"
 //   bun run scripts/orchestration-bridge.ts complete-team <team-name>
 //   bun run scripts/orchestration-bridge.ts announce <agent-id> --content "message" [--to <agent-id>]
-//
-// Teams:
-//   playwright  — Riley Nakamura + Sam Okonkwo, Casey Lin, Alex Petrov
-//   engineering — Sana Okafor + Mia Torres, Ravi Patel, Zoe Chen, Kai Nakamura, Marcus Webb
-//   qa          — Lex Morales + Priya Desai, Sam Torres
-//   ai          — Noor Abbasi + Eli Vance
-//   community   — Ava Chen + Jules Rivera, Ren Kowalski, Maya Patel
-//   product     — Dana Whitfield + Marc Delacroix, Leo Tanaka, Iris Oduya
-//   leadership  — Jordan Park, Sana Okafor, Lex Morales, Noor Abbasi, Ava Chen, Dana Whitfield
+
+import { loadConfig, getTeamMap } from './load-config';
 
 const API = process.env.VENTUREOS_API || 'http://localhost:3000';
 
-// ── Team Definitions ────────────────────────────────────────────
+// ── Load Teams from Config ──────────────────────────────────────
+
+const config = loadConfig();
+const configTeamMap = getTeamMap(config);
 
 interface TeamMember {
   agentId: string;
@@ -31,72 +27,17 @@ interface TeamMember {
   defaultTask?: string;
 }
 
-const TEAMS: Record<string, { lead: string; members: TeamMember[] }> = {
-  playwright: {
-    lead: 'riley-nakamura',
-    members: [
-      { agentId: 'riley-nakamura', name: 'Riley Nakamura', defaultTask: 'Leading Playwright test expansion' },
-      { agentId: 'sam-okonkwo', name: 'Sam Okonkwo', defaultTask: 'E2E test automation' },
-      { agentId: 'casey-lin', name: 'Casey Lin', defaultTask: 'E2E test automation' },
-      { agentId: 'alex-petrov', name: 'Alex Petrov', defaultTask: 'Browser infra setup' },
-    ],
-  },
-  engineering: {
-    lead: 'sana-okafor',
-    members: [
-      { agentId: 'sana-okafor', name: 'Sana Okafor', defaultTask: 'Engineering oversight' },
-      { agentId: 'mia-torres', name: 'Mia Torres', defaultTask: 'Frontend development' },
-      { agentId: 'ravi-patel', name: 'Ravi Patel', defaultTask: 'Frontend development' },
-      { agentId: 'zoe-chen', name: 'Zoe Chen', defaultTask: 'Frontend development' },
-      { agentId: 'kai-nakamura', name: 'Kai Nakamura', defaultTask: 'Backend development' },
-      { agentId: 'marcus-webb', name: 'Marcus Webb', defaultTask: 'DevOps & CI/CD' },
-    ],
-  },
-  qa: {
-    lead: 'lex-morales',
-    members: [
-      { agentId: 'lex-morales', name: 'Lex Morales', defaultTask: 'QA oversight' },
-      { agentId: 'priya-desai', name: 'Priya Desai', defaultTask: 'Functional testing' },
-      { agentId: 'sam-torres', name: 'Sam Torres', defaultTask: 'Integration testing' },
-    ],
-  },
-  ai: {
-    lead: 'noor-abbasi',
-    members: [
-      { agentId: 'noor-abbasi', name: 'Noor Abbasi', defaultTask: 'AI/LLM architecture' },
-      { agentId: 'eli-vance', name: 'Eli Vance', defaultTask: 'Agentic systems' },
-    ],
-  },
-  community: {
-    lead: 'ava-chen',
-    members: [
-      { agentId: 'ava-chen', name: 'Ava Chen', defaultTask: 'Community management' },
-      { agentId: 'jules-rivera', name: 'Jules Rivera', defaultTask: 'Technical writing' },
-      { agentId: 'ren-kowalski', name: 'Ren Kowalski', defaultTask: 'Developer relations' },
-      { agentId: 'maya-patel', name: 'Maya Patel', defaultTask: 'Content engineering' },
-    ],
-  },
-  product: {
-    lead: 'dana-whitfield',
-    members: [
-      { agentId: 'dana-whitfield', name: 'Dana Whitfield', defaultTask: 'Product delivery' },
-      { agentId: 'marc-delacroix', name: 'Marc Delacroix', defaultTask: 'Sprint planning' },
-      { agentId: 'leo-tanaka', name: 'Leo Tanaka', defaultTask: 'Program management' },
-      { agentId: 'iris-oduya', name: 'Iris Oduya', defaultTask: 'Technical PM' },
-    ],
-  },
-  leadership: {
-    lead: 'jordan-park',
-    members: [
-      { agentId: 'jordan-park', name: 'Jordan Park', defaultTask: 'Company leadership' },
-      { agentId: 'sana-okafor', name: 'Sana Okafor', defaultTask: 'Engineering VP' },
-      { agentId: 'lex-morales', name: 'Lex Morales', defaultTask: 'Quality VP' },
-      { agentId: 'noor-abbasi', name: 'Noor Abbasi', defaultTask: 'AI VP' },
-      { agentId: 'ava-chen', name: 'Ava Chen', defaultTask: 'Community VP' },
-      { agentId: 'dana-whitfield', name: 'Dana Whitfield', defaultTask: 'Product VP' },
-    ],
-  },
-};
+const TEAMS: Record<string, { lead: string; members: TeamMember[] }> = {};
+for (const [teamName, teamData] of Object.entries(configTeamMap)) {
+  TEAMS[teamName] = {
+    lead: teamData.lead,
+    members: teamData.members.map(m => ({
+      agentId: m.id,
+      name: m.name,
+      defaultTask: m.capabilities?.[0] ? `Working on ${m.capabilities[0]}` : m.role,
+    })),
+  };
+}
 
 // ── API Helpers ──────────────────────────────────────────────────
 
@@ -274,11 +215,19 @@ function parseArgs(args: string[]): Record<string, string> {
 }
 
 function usage() {
-  console.log(`
-orchestration-bridge.ts — Bridge agent orchestration to VentureOS Virtual Office
+  const teamList = Object.keys(TEAMS)
+    .map(name => {
+      const t = TEAMS[name];
+      const lead = t.members.find(m => m.agentId === t.lead);
+      const others = t.members.filter(m => m.agentId !== t.lead).map(m => m.name).join(', ');
+      return `  ${name.padEnd(14)} — ${lead?.name || '?'}${others ? ` + ${others}` : ''}`;
+    })
+    .join('\n');
 
-When Max deploys agents, this pushes coordinated events so the VO dashboard
-reflects REAL activity — agents light up, move to rooms, show active status.
+  console.log(`
+orchestration-bridge.ts — Bridge agent orchestration to ${config.company.name} Virtual Office
+
+Reads teams/agents from ventureos.config.json.
 
 Usage:
   bun run scripts/orchestration-bridge.ts <command> <target> [options]
@@ -287,15 +236,12 @@ Commands:
 
   deploy-agent <agent-id>
     --task <desc>      What the agent is working on (required)
-    Activates agent, creates task, announces to office.
 
   complete-agent <agent-id>
     --task <desc>      What was completed (required)
-    Marks task done, announces completion, sets agent idle.
 
   deploy-team <team-name>
     --task <desc>      Team mission (required)
-    Deploys all team members with staggered activation.
 
   complete-team <team-name>
     Completes all team members and stands down the team.
@@ -304,27 +250,14 @@ Commands:
     --content <msg>    Message to say (required)
     --to <agent-id>    Direct message recipient
 
-Teams:
-  playwright   — Riley + Sam Okonkwo, Casey Lin, Alex Petrov
-  engineering  — Sana + Mia, Ravi, Zoe, Kai, Marcus
-  qa           — Lex + Priya Desai, Sam Torres
-  ai           — Noor + Eli
-  community    — Ava + Jules, Ren, Maya
-  product      — Dana + Marc, Leo, Iris
-  leadership   — Jordan, Sana, Lex, Noor, Ava, Dana
+Teams (from config):
+${teamList}
 
 Examples:
-  # Deploy Riley's Playwright team to record demos
-  bun run scripts/orchestration-bridge.ts deploy-team playwright --task "Playwright demo recording"
-
-  # Deploy a single agent
-  bun run scripts/orchestration-bridge.ts deploy-agent riley-nakamura --task "Recording E2E test suite"
-
-  # Agent says something
-  bun run scripts/orchestration-bridge.ts announce riley-nakamura --content "Tests passing, recording demo"
-
-  # Complete the team's work
-  bun run scripts/orchestration-bridge.ts complete-team playwright
+  bun run scripts/orchestration-bridge.ts deploy-team engineering --task "Sprint work"
+  bun run scripts/orchestration-bridge.ts deploy-agent alice --task "API redesign"
+  bun run scripts/orchestration-bridge.ts announce alice --content "Tests passing"
+  bun run scripts/orchestration-bridge.ts complete-team engineering
 `);
 }
 

@@ -109,6 +109,90 @@ Connect to receive real-time events as they happen — agent messages, task upda
 
 ---
 
+## ⚙️ Configuration
+
+VentureOS reads its org structure from **`ventureos.config.json`** at the repo root. This is how you define your company, teams, and agents — no code changes needed.
+
+### Quick Setup
+
+```bash
+# Copy the example config
+cp ventureos.config.example.json ventureos.config.json
+
+# Edit with your org structure
+# Then restart the servers
+```
+
+### Config Schema
+
+```jsonc
+{
+  "company": {
+    "name": "Acme Corp",                    // Your company name
+    "tagline": "Building the Future",        // Shown in header
+    "branding": {
+      "primaryColor": "#2563eb",             // Primary brand color
+      "secondaryColor": "#7c3aed",           // Secondary color
+      "accentColor": "#16a34a"               // Accent color
+    }
+  },
+  "teams": [
+    {
+      "name": "engineering",                 // Team slug (used as ID)
+      "displayName": "Engineering",          // Human-readable name
+      "color": "#3b82f6",                    // Team color
+      "icon": "code",                        // Icon identifier
+      "roomType": "open_office"              // Office room type
+    }
+  ],
+  "agents": [
+    {
+      "id": "alice",                         // Unique agent ID
+      "name": "Alice Zhang",                // Display name
+      "role": "CEO",                         // Role title
+      "team": "leadership",                  // Team slug
+      "parentId": null,                      // Reports to (agent ID)
+      "capabilities": ["strategy"],          // Skills/capabilities
+      "isLead": true                         // Team lead flag
+    }
+  ],
+  "rooms": []                                // Auto-generated from teams if empty
+}
+```
+
+### Room Types
+
+| Type | Use Case |
+|------|----------|
+| `corner_office` | Leadership / small teams |
+| `open_office` | Engineering / large teams |
+| `meeting_room` | Meetings / collaboration |
+| `server_room` | AI / infrastructure teams |
+| `break_room` | Break room (auto-created) |
+| `lobby` | Lobby (auto-created) |
+
+Rooms are auto-generated proportional to team size when the `rooms` array is empty.
+
+### Pushing Live Data
+
+After configuring, push your team to the running server:
+
+```bash
+bun run scripts/push-live-team.ts
+```
+
+### Orchestration Bridge
+
+Deploy and manage teams from the CLI:
+
+```bash
+bun run scripts/orchestration-bridge.ts deploy-team engineering --task "Sprint work"
+bun run scripts/orchestration-bridge.ts deploy-agent alice --task "API redesign"
+bun run scripts/orchestration-bridge.ts complete-team engineering
+```
+
+---
+
 ## 🏗️ Architecture
 
 Event-sourced MCP server → WebSocket → React dashboard.
