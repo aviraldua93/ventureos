@@ -18,33 +18,51 @@ export function VirtualOffice() {
   const [tooltipAgent, setTooltipAgent] = useState<Agent | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const agents = useVentureStore(s => s.agents);
 
-  // Initialize engine
+  // Initialize engine with error handling
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const rect = container.getBoundingClientRect();
+    let destroyed = false;
 
-    const engine = new OfficeEngine({
-      canvas,
-      mapData: defaultOffice,
-      width: rect.width || 800,
-      height: rect.height || 600,
-    });
+    const initEngine = async () => {
+      try {
+        const rect = container.getBoundingClientRect();
+        const engine = new OfficeEngine({
+          canvas,
+          mapData: defaultOffice,
+          width: rect.width || 800,
+          height: rect.height || 600,
+        });
 
-    engineRef.current = engine;
+        if (destroyed) { engine.destroy(); return; }
+        await engine.init();
+        if (destroyed) { engine.destroy(); return; }
 
-    engine.init().then(() => {
-      setReady(true);
-    });
+        engineRef.current = engine;
+        setReady(true);
+        setError(null);
+      } catch (err) {
+        console.error('[VirtualOffice] Init failed:', err);
+        if (!destroyed) {
+          setError(err instanceof Error ? err.message : 'Failed to initialize');
+        }
+      }
+    };
+
+    initEngine();
 
     return () => {
-      engineRef.current = null;
-      engine.destroy();
+      destroyed = true;
+      if (engineRef.current) {
+        engineRef.current.destroy();
+        engineRef.current = null;
+      }
       setReady(false);
     };
   }, []);
@@ -178,10 +196,18 @@ export function VirtualOffice() {
     <div className={css.container} ref={containerRef}>
       <canvas ref={canvasRef} className={css.canvas} />
 
-      {!ready && (
+      {!ready && !error && (
         <div className={css.loadingState}>
           <div className={css.loadingSpinner} />
           <span>Initializing Virtual Office…</span>
+        </div>
+      )}
+
+      {error && (
+        <div className={css.loadingState}>
+          <span style={{ fontSize: '2rem' }}>⚠️</span>
+          <span style={{ fontWeight: 600 }}>Virtual Office Error</span>
+          <span style={{ fontSize: '12px', opacity: 0.7, fontFamily: 'var(--font-mono)' }}>{error}</span>
         </div>
       )}
 

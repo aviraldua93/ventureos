@@ -1,3 +1,4 @@
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import { useVentureStore } from './store';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui';
@@ -12,10 +13,47 @@ import { VirtualOffice } from './components/VirtualOffice/VirtualOffice';
 import './App.css';
 import css from './App.module.css';
 
+function useResizablePanels(initL: number, initR: number, minL: number, minR: number, minC: number) {
+  const [leftW, setLeftW] = useState(initL);
+  const [rightW, setRightW] = useState(initR);
+  const dragging = useRef<'left' | 'right' | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const startDrag = useCallback((side: 'left' | 'right') => {
+    dragging.current = side;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!dragging.current || !gridRef.current) return;
+      const rect = gridRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      if (dragging.current === 'left') {
+        setLeftW(Math.max(minL, Math.min(x, rect.width - rightW - minC)));
+      } else {
+        setRightW(Math.max(minR, Math.min(rect.right - e.clientX, rect.width - leftW - minC)));
+      }
+    };
+    const onUp = () => {
+      dragging.current = null;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+  }, [leftW, rightW, minL, minR, minC]);
+
+  return { leftW, rightW, gridRef, startDrag };
+}
+
 export default function App() {
   useWebSocket();
   const { agents, tasks, messages, codeChanges, connected } = useVentureStore();
   const eventCount = agents.length + tasks.length + messages.length + codeChanges.length;
+  const { leftW, rightW, gridRef, startDrag } = useResizablePanels(260, 320, 180, 200, 300);
 
   return (
     <Tabs defaultValue="dashboard" className={css.app}>
@@ -47,14 +85,24 @@ export default function App() {
 
       {/* Dashboard tab */}
       <TabsContent value="dashboard" className={css.tabContent}>
-        <div className={css.dashboardGrid}>
+        <div
+          className={css.dashboardGrid}
+          ref={gridRef}
+          style={{ gridTemplateColumns: `${leftW}px 4px 1fr 4px ${rightW}px` }}
+        >
           <aside className={css.panelLeft} data-testid="panel-left">
             <AgentListPanel />
           </aside>
+          <div className={css.resizeHandle} onMouseDown={() => startDrag('left')}>
+            <div className={css.resizeGrip} />
+          </div>
           <section className={css.panelCenter} data-testid="panel-center">
             <MessageStream />
             <TaskBoard />
           </section>
+          <div className={css.resizeHandle} onMouseDown={() => startDrag('right')}>
+            <div className={css.resizeGrip} />
+          </div>
           <aside className={css.panelRight}>
             <CodeDiffView />
           </aside>

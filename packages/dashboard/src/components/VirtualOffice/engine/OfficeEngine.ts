@@ -53,9 +53,9 @@ export class OfficeEngine {
       canvas: this.options.canvas,
       width: this.options.width,
       height: this.options.height,
-      backgroundColor: 0x0a0e14,
+      background: 0x0a0e14,
       antialias: false,
-      resolution: window.devicePixelRatio || 1,
+      resolution: Math.min(window.devicePixelRatio || 1, 2),
       autoDensity: true,
     });
 
@@ -130,6 +130,11 @@ export class OfficeEngine {
 
   destroy() {
     this._destroyed = true;
-    this.app.destroy(true, { children: true });
+    this._ready = false;
+    try {
+      this.app.destroy(true, { children: true });
+    } catch {
+      // Ignore errors during cleanup
+    }
   }
 }
