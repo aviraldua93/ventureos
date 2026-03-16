@@ -110,3 +110,19 @@
   --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.15);
 }
+
+/* Midnight theme override */
+[data-theme="midnight"] {
+  --color-bg-base:        #020408;
+  --color-bg-surface:     #080c14;
+  --color-bg-elevated:    #0e1520;
+  --color-border-default: #1a2535;
+  --color-border-subtle:  #121c2a;
+  --color-accent:         #6db3ff;
+  --color-accent-hover:   #8ec5ff;
+  --color-accent-muted:   rgba(109, 179, 255, 0.12);
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 30px rgba(77, 159, 255, 0.2);
+}

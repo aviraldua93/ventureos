@@ -17,7 +17,7 @@ const SPEEDS = [1, 2, 5, 10];
 export function TimeScrubber({ engine }: TimeScrubberProps) {
   const {
     mode, currentTime, playbackSpeed, isPlaying,
-    minTime, maxTime, eventCount,
+    minTime, maxTime, eventCount, bookmarks,
     play, pause, setSpeed, scrubTo, goLive, startReplay,
   } = useEventReplay(engine);
 
@@ -41,8 +41,10 @@ export function TimeScrubber({ engine }: TimeScrubberProps) {
     scrubTo(time);
   }, [minTime, maxTime, scrubTo]);
 
+  const range = maxTime - minTime || 1;
+
   return (
-    <div className={css.scrubber}>
+    <div className={css.scrubber} data-testid="time-scrubber">
       {/* Timeline heatmap */}
       <div
         className={css.timelineContainer}
@@ -59,6 +61,20 @@ export function TimeScrubber({ engine }: TimeScrubberProps) {
           ))}
         </div>
         <div className={css.playhead} style={{ left: `${progress * 100}%` }} />
+
+        {/* Bookmark markers */}
+        {bookmarks.map((bm, i) => {
+          const pos = ((bm.timestamp - minTime) / range) * 100;
+          return (
+            <div
+              key={i}
+              className={`${css.bookmarkMarker} ${bm.type === 'auto' ? css.bookmarkAuto : css.bookmarkManual}`}
+              style={{ left: `${pos}%` }}
+              title={bm.label}
+              onClick={(e) => { e.stopPropagation(); scrubTo(bm.timestamp); }}
+            />
+          );
+        })}
       </div>
 
       {/* Controls */}
@@ -66,6 +82,7 @@ export function TimeScrubber({ engine }: TimeScrubberProps) {
         <button
           className={css.playBtn}
           onClick={() => { isPlaying ? pause() : play(); }}
+          data-testid="replay-play-btn"
         >
           {isPlaying ? '⏸' : '▶'}
         </button>
@@ -82,6 +99,10 @@ export function TimeScrubber({ engine }: TimeScrubberProps) {
 
         <span className={css.timeLabel}>{formatTime(currentTime)}</span>
         <span className={css.eventCount}>{eventCount} events</span>
+
+        {bookmarks.length > 0 && (
+          <span className={css.bookmarkCount} data-testid="bookmark-count">📌 {bookmarks.length}</span>
+        )}
 
         <div className={css.modeToggle}>
           <button

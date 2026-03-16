@@ -1,42 +1,47 @@
-import { Container, Graphics, Text, TextStyle } from 'pixi.js';
-
 /** Agent palette — matches CSS token agent colors */
 const AGENT_COLORS = [
-  0x4d9fff, 0x3ddc84, 0xff6eb4, 0xffb647, 0xa78bfa,
-  0x38bdf8, 0xfb923c, 0xf472b6, 0x34d399, 0xc084fc,
+  '#4d9fff', '#3ddc84', '#ff6eb4', '#ffb647', '#a78bfa',
+  '#38bdf8', '#fb923c', '#f472b6', '#34d399', '#c084fc',
 ];
 
 export type AnimationState = 'idle' | 'walking' | 'typing' | 'talking' | 'error' | 'offline';
+export type EmotionState = 'neutral' | 'busy' | 'thinking' | 'frustrated' | 'excited' | 'focused';
+
+export interface SpeechBubbleData {
+  type: string;
+  timer: number;
+}
 
 export interface AgentSprite {
   id: string;
   name: string;
   role: string;
-  container: Container;
+  container: { x: number; y: number };
   state: AnimationState;
-  color: number;
+  emotion: EmotionState;
+  color: string;
   tileX: number;
   tileY: number;
   targetX: number;
   targetY: number;
+  renderX: number;
+  renderY: number;
   path: Array<{ x: number; y: number }>;
   pathIndex: number;
-  speechBubble: Container | null;
+  speechBubble: SpeechBubbleData | null;
   speechTimer: number;
   animFrame: number;
   animTimer: number;
 }
 
 export class SpriteManager {
-  readonly container: Container;
+  readonly container = {};
   private sprites = new Map<string, AgentSprite>();
   private tileSize: number;
   private colorIndex = 0;
 
   constructor(tileSize: number) {
     this.tileSize = tileSize;
-    this.container = new Container();
-    this.container.label = 'sprites';
   }
 
   getSprite(agentId: string): AgentSprite | undefined {
@@ -53,42 +58,23 @@ export class SpriteManager {
     const color = AGENT_COLORS[this.colorIndex % AGENT_COLORS.length];
     this.colorIndex++;
 
-    const container = new Container();
-    container.label = `agent-${agentId}`;
-    container.x = tileX * this.tileSize + this.tileSize / 2;
-    container.y = tileY * this.tileSize + this.tileSize / 2;
-
-    // Draw the pixel art character
-    this.drawCharacter(container, color, 'idle');
-
-    // Name label
-    const label = new Text({
-      text: (name ?? '').split(' ')[0] || name || '?',
-      style: new TextStyle({
-        fontSize: 8,
-        fill: 0xe8edf4,
-        fontFamily: 'monospace',
-        align: 'center',
-      }),
-    });
-    label.anchor.set(0.5, 0);
-    label.y = 12;
-    label.label = 'name-label';
-    container.addChild(label);
-
-    this.container.addChild(container);
+    const px = tileX * this.tileSize + this.tileSize / 2;
+    const py = tileY * this.tileSize + this.tileSize / 2;
 
     const sprite: AgentSprite = {
       id: agentId,
       name,
       role,
-      container,
+      container: { x: px, y: py },
       state: 'idle',
+      emotion: 'neutral',
       color,
       tileX,
       tileY,
       targetX: tileX,
       targetY: tileY,
+      renderX: px,
+      renderY: py,
       path: [],
       pathIndex: 0,
       speechBubble: null,
@@ -102,19 +88,19 @@ export class SpriteManager {
   }
 
   remove(agentId: string) {
-    const sprite = this.sprites.get(agentId);
-    if (sprite) {
-      this.container.removeChild(sprite.container);
-      sprite.container.destroy({ children: true });
-      this.sprites.delete(agentId);
-    }
+    this.sprites.delete(agentId);
   }
 
   setState(agentId: string, state: AnimationState) {
     const sprite = this.sprites.get(agentId);
     if (!sprite || sprite.state === state) return;
     sprite.state = state;
-    this.redrawCharacter(sprite);
+  }
+
+  setEmotion(agentId: string, emotion: EmotionState) {
+    const sprite = this.sprites.get(agentId);
+    if (!sprite) return;
+    sprite.emotion = emotion;
   }
 
   setPath(agentId: string, path: Array<{ x: number; y: number }>) {
@@ -124,55 +110,19 @@ export class SpriteManager {
     sprite.pathIndex = 0;
     if (path.length > 0) {
       sprite.state = 'walking';
-      this.redrawCharacter(sprite);
     }
   }
 
   showSpeechBubble(agentId: string, messageType: string, duration = 3000) {
     const sprite = this.sprites.get(agentId);
     if (!sprite) return;
-
-    this.hideSpeechBubble(agentId);
-
-    const bubble = new Container();
-    bubble.label = 'speech-bubble';
-
-    const bubbleColors: Record<string, number> = {
-      chat: 0xe8edf4,
-      blocker: 0xff5c5c,
-      review: 0xffb647,
-      task: 0x4d9fff,
-    };
-    const bgColor = bubbleColors[messageType] ?? 0xe8edf4;
-
-    const bg = new Graphics();
-    bg.roundRect(-12, -28, 24, 14, 4);
-    bg.fill(bgColor);
-    // Bubble tail
-    bg.moveTo(-3, -14);
-    bg.lineTo(0, -8);
-    bg.lineTo(3, -14);
-    bg.fill(bgColor);
-    bubble.addChild(bg);
-
-    // Dots (typing indicator style)
-    for (let i = 0; i < 3; i++) {
-      const dot = new Graphics();
-      dot.circle(-6 + i * 6, -21, 1.5);
-      dot.fill(messageType === 'chat' ? 0x556677 : 0xffffff);
-      bubble.addChild(dot);
-    }
-
-    sprite.container.addChild(bubble);
-    sprite.speechBubble = bubble;
+    sprite.speechBubble = { type: messageType, timer: duration };
     sprite.speechTimer = duration;
   }
 
   hideSpeechBubble(agentId: string) {
     const sprite = this.sprites.get(agentId);
-    if (!sprite || !sprite.speechBubble) return;
-    sprite.container.removeChild(sprite.speechBubble);
-    sprite.speechBubble.destroy({ children: true });
+    if (!sprite) return;
     sprite.speechBubble = null;
     sprite.speechTimer = 0;
   }
@@ -187,27 +137,38 @@ export class SpriteManager {
         const tx = target.x * this.tileSize + this.tileSize / 2;
         const ty = target.y * this.tileSize + this.tileSize / 2;
 
-        const dx = tx - sprite.container.x;
-        const dy = ty - sprite.container.y;
+        const dx = tx - sprite.renderX;
+        const dy = ty - sprite.renderY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < 2) {
-          sprite.container.x = tx;
-          sprite.container.y = ty;
+          sprite.renderX = tx;
+          sprite.renderY = ty;
           sprite.tileX = target.x;
           sprite.tileY = target.y;
+          sprite.container.x = tx;
+          sprite.container.y = ty;
           sprite.pathIndex++;
 
           if (sprite.pathIndex >= sprite.path.length) {
             sprite.path = [];
             sprite.pathIndex = 0;
             sprite.state = sprite.state === 'walking' ? 'idle' : sprite.state;
-            this.redrawCharacter(sprite);
           }
         } else {
-          sprite.container.x += dx * moveSpeed;
-          sprite.container.y += dy * moveSpeed;
+          sprite.renderX += dx * moveSpeed;
+          sprite.renderY += dy * moveSpeed;
+          sprite.container.x = sprite.renderX;
+          sprite.container.y = sprite.renderY;
         }
+      } else {
+        // When not walking, snap render position to tile position
+        const tx = sprite.tileX * this.tileSize + this.tileSize / 2;
+        const ty = sprite.tileY * this.tileSize + this.tileSize / 2;
+        sprite.renderX = tx;
+        sprite.renderY = ty;
+        sprite.container.x = tx;
+        sprite.container.y = ty;
       }
 
       // Animation timer
@@ -215,7 +176,6 @@ export class SpriteManager {
       if (sprite.animTimer > 400) {
         sprite.animTimer = 0;
         sprite.animFrame = (sprite.animFrame + 1) % 4;
-        this.updateAnimation(sprite);
       }
 
       // Speech bubble timer
@@ -225,85 +185,6 @@ export class SpriteManager {
           this.hideSpeechBubble(sprite.id);
         }
       }
-    }
-  }
-
-  private drawCharacter(container: Container, color: number, state: AnimationState) {
-    const g = new Graphics();
-    g.label = 'character';
-
-    // Head
-    g.circle(0, -6, 5);
-    g.fill(0xf0d6b0); // skin tone
-    // Hair
-    g.rect(-5, -12, 10, 4);
-    g.fill(color);
-    // Body
-    g.roundRect(-6, -1, 12, 10, 2);
-    g.fill(color);
-
-    if (state === 'error') {
-      // Red exclamation mark
-      const err = new Graphics();
-      err.label = 'error-mark';
-      err.circle(8, -10, 5);
-      err.fill(0xff5c5c);
-      const txt = new Text({
-        text: '!',
-        style: new TextStyle({ fontSize: 8, fill: 0xffffff, fontWeight: 'bold' }),
-      });
-      txt.anchor.set(0.5);
-      txt.x = 8;
-      txt.y = -10;
-      container.addChild(err);
-      container.addChild(txt);
-    }
-
-    if (state === 'offline') {
-      g.alpha = 0.35;
-    }
-
-    container.addChild(g);
-  }
-
-  private redrawCharacter(sprite: AgentSprite) {
-    // Remove old character graphic
-    const old = sprite.container.getChildByLabel('character');
-    if (old) {
-      sprite.container.removeChild(old);
-      old.destroy();
-    }
-    const oldErr = sprite.container.getChildByLabel('error-mark');
-    if (oldErr) {
-      sprite.container.removeChild(oldErr);
-      oldErr.destroy();
-    }
-    this.drawCharacter(sprite.container, sprite.color, sprite.state);
-  }
-
-  private updateAnimation(sprite: AgentSprite) {
-    const charGraphic = sprite.container.getChildByLabel('character');
-    if (!charGraphic) return;
-
-    switch (sprite.state) {
-      case 'idle':
-        // Gentle bob
-        charGraphic.y = Math.sin(sprite.animFrame * Math.PI / 2) * 1;
-        break;
-      case 'walking':
-        // Walk bounce
-        charGraphic.y = -Math.abs(Math.sin(sprite.animFrame * Math.PI / 2)) * 2;
-        break;
-      case 'typing':
-        // Subtle typing motion
-        charGraphic.x = Math.sin(sprite.animFrame * Math.PI) * 0.5;
-        break;
-      case 'talking':
-        charGraphic.y = Math.sin(sprite.animFrame * Math.PI / 2) * 1.5;
-        break;
-      default:
-        charGraphic.x = 0;
-        charGraphic.y = 0;
     }
   }
 }

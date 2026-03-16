@@ -4,7 +4,7 @@ import type { TimeTravelState } from '../engine/TimeTravelController';
 
 /**
  * React hook for the time-travel replay engine.
- * Provides play/pause/scrub controls and current state.
+ * Provides play/pause/scrub controls, bookmarks, and current state.
  */
 export function useEventReplay(engine: OfficeEngine | null) {
   const [state, setState] = useState<TimeTravelState>({
@@ -15,6 +15,7 @@ export function useEventReplay(engine: OfficeEngine | null) {
     minTime: Date.now(),
     maxTime: Date.now(),
     eventCount: 0,
+    bookmarks: [],
   });
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export function useEventReplay(engine: OfficeEngine | null) {
   const scrubTo = useCallback((t: number) => engine?.timeTravel.scrubTo(t), [engine]);
   const goLive = useCallback(() => engine?.timeTravel.switchToLive(), [engine]);
   const startReplay = useCallback(() => engine?.timeTravel.switchToReplay(), [engine]);
+  const addBookmark = useCallback((ts: number, label: string) => engine?.timeTravel.addBookmark(ts, label), [engine]);
 
   return {
     ...state,
@@ -42,5 +44,6 @@ export function useEventReplay(engine: OfficeEngine | null) {
     scrubTo,
     goLive,
     startReplay,
+    addBookmark,
   };
 }

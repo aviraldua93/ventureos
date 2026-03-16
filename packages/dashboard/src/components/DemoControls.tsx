@@ -10,6 +10,7 @@ interface DemoStatus {
   paused: boolean;
   speed: number;
   progress: { current: number; total: number; pct: number };
+  liveMode?: boolean;
 }
 
 const SPEEDS = [1, 2, 5, 10];
@@ -79,7 +80,7 @@ export function DemoControls() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.15 }}
         >
-          Demo — {status.paused ? 'Paused' : 'Playing'} · {status.speed}×
+          Demo — {status.paused ? 'Paused' : status.liveMode ? 'Live ●' : 'Playing'} · {status.speed}×
         </motion.div>
       )}
 
@@ -102,7 +103,7 @@ export function DemoControls() {
             />
           </div>
           <span className={css.progressText}>
-            {status.progress.current}/{status.progress.total}
+            {status.liveMode ? '● Live' : `${status.progress.current}/${status.progress.total}`}
           </span>
         </div>
 

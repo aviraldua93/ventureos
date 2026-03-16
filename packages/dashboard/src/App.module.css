@@ -395,3 +395,96 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
+/* ── Spectator Badge ────────────────────────────────────── */
+.spectatorBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+}
+
+/* ── Settings View ──────────────────────────────────────── */
+.settingsView {
+  padding: var(--space-8);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.settingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.settingsSectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.settingsDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.settingsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.settingsLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  min-width: 80px;
+}
+
+.settingsSelect {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.settingsInput {
+  flex: 1;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+}
+
+.settingsBtn {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: background var(--transition-fast);
+}
+
+.settingsBtn:hover {
+  background: var(--color-accent-hover);
+}
+

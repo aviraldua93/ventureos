@@ -2,6 +2,12 @@ import type { VentureEvent } from '@ventureos/shared';
 
 export type PlaybackMode = 'live' | 'replay';
 
+export interface Bookmark {
+  timestamp: number;
+  label: string;
+  type: 'auto' | 'manual';
+}
+
 export interface TimeTravelState {
   mode: PlaybackMode;
   currentTime: number;
@@ -10,6 +16,7 @@ export interface TimeTravelState {
   minTime: number;
   maxTime: number;
   eventCount: number;
+  bookmarks: Bookmark[];
 }
 
 type TimeTravelListener = (state: TimeTravelState) => void;
@@ -28,6 +35,7 @@ export class TimeTravelController {
   private _replayIndex = 0;
   private listeners = new Set<TimeTravelListener>();
   private onReplayEvent: ((event: VentureEvent) => void) | null = null;
+  private _bookmarks: Bookmark[] = [];
 
   get state(): TimeTravelState {
     return {
@@ -38,7 +46,12 @@ export class TimeTravelController {
       minTime: this.events[0]?.timestamp ?? Date.now(),
       maxTime: this.events[this.events.length - 1]?.timestamp ?? Date.now(),
       eventCount: this.events.length,
+      bookmarks: [...this._bookmarks],
     };
+  }
+
+  get bookmarks(): Bookmark[] {
+    return [...this._bookmarks];
   }
 
   setReplayCallback(cb: (event: VentureEvent) => void) {
@@ -67,10 +80,52 @@ export class TimeTravelController {
       }
     }
 
+    // Auto-bookmark significant events
+    this.autoBookmark(event);
+
     if (this._mode === 'live') {
       this._currentTime = event.timestamp;
       this.notify();
     }
+  }
+
+  /** Auto-detect significant events for bookmarks */
+  private autoBookmark(event: VentureEvent) {
+    if (event.type === 'agent/register') {
+      this._bookmarks.push({
+        timestamp: event.timestamp,
+        label: `${event.data.name} joined`,
+        type: 'auto',
+      });
+    } else if (event.type === 'agent/heartbeat' && event.data.status === 'error') {
+      this._bookmarks.push({
+        timestamp: event.timestamp,
+        label: `${event.data.agentId} errored`,
+        type: 'auto',
+      });
+    } else if (event.type === 'agent/task_update' && event.data.status === 'done') {
+      this._bookmarks.push({
+        timestamp: event.timestamp,
+        label: `Task done: ${event.data.title}`,
+        type: 'auto',
+      });
+    } else if (event.type === 'agent/message' && event.data.messageType === 'blocker') {
+      this._bookmarks.push({
+        timestamp: event.timestamp,
+        label: `Blocker from ${event.data.from}`,
+        type: 'auto',
+      });
+    }
+  }
+
+  addBookmark(timestamp: number, label: string) {
+    this._bookmarks.push({ timestamp, label, type: 'manual' });
+    this.notify();
+  }
+
+  removeBookmark(index: number) {
+    this._bookmarks.splice(index, 1);
+    this.notify();
   }
 
   /** Get all events up to a given timestamp */

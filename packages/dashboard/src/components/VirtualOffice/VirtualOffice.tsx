@@ -108,7 +108,6 @@ export function VirtualOffice() {
       lastX = e.clientX;
       lastY = e.clientY;
 
-      // Check hover on agents
       handleHover(e);
     };
 
@@ -147,20 +146,15 @@ export function VirtualOffice() {
     const screenX = e.clientX - rect.left;
     const screenY = e.clientY - rect.top;
 
-    // Convert screen coords to world coords
     const cam = engineRef.current.camera.state;
-    const worldContainer = engineRef.current.app.stage.children[0];
-    if (!worldContainer) return;
+    const worldX = (screenX - rect.width / 2 + cam.x * cam.zoom) / cam.zoom;
+    const worldY = (screenY - rect.height / 2 + cam.y * cam.zoom) / cam.zoom;
 
-    const worldX = (screenX - worldContainer.x) / cam.zoom;
-    const worldY = (screenY - worldContainer.y) / cam.zoom;
-
-    // Check proximity to any agent sprite
     const sprites = engineRef.current.sprites.getAllSprites();
     let found = false;
     for (const sprite of sprites) {
-      const sx = sprite.container.x;
-      const sy = sprite.container.y;
+      const sx = sprite.renderX ?? (sprite.tileX * 32 + 16);
+      const sy = sprite.renderY ?? (sprite.tileY * 32 + 16);
       const dist = Math.sqrt((worldX - sx) ** 2 + (worldY - sy) ** 2);
 
       if (dist < 20) {
@@ -193,7 +187,7 @@ export function VirtualOffice() {
   }, [handleHover]);
 
   return (
-    <div className={css.container} ref={containerRef}>
+    <div className={css.container} ref={containerRef} data-testid="virtual-office">
       <canvas ref={canvasRef} className={css.canvas} />
 
       {!ready && !error && (

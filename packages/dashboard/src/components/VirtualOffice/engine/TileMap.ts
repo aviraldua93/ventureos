@@ -35,41 +35,46 @@ export class TileMap {
   private render() {
     const { tiles, tileSize, furniture, rooms } = this.mapData;
 
-    // Draw floor + walls
+    // Batch ALL floor/wall tiles into a single Graphics object
+    const tileGraphics = new Graphics();
+    tileGraphics.label = 'tiles';
     for (let y = 0; y < tiles.length; y++) {
       for (let x = 0; x < (tiles[y]?.length ?? 0); x++) {
         const tile = tiles[y][x];
-        const g = new Graphics();
-        g.rect(x * tileSize, y * tileSize, tileSize, tileSize);
-        g.fill(TILE_COLORS[tile]);
-        // Grid lines
-        g.rect(x * tileSize, y * tileSize, tileSize, tileSize);
-        g.stroke({ width: 0.5, color: 0x1e2a38 });
-        this.container.addChild(g);
+        const px = x * tileSize;
+        const py = y * tileSize;
+        tileGraphics.rect(px, py, tileSize, tileSize);
+        tileGraphics.fill(TILE_COLORS[tile]);
+        tileGraphics.rect(px, py, tileSize, tileSize);
+        tileGraphics.stroke({ width: 0.5, color: 0x1e2a38 });
       }
     }
+    this.container.addChild(tileGraphics);
 
-    // Draw room labels (subtle)
+    // Batch room overlays into a single Graphics
+    const roomGraphics = new Graphics();
+    roomGraphics.label = 'rooms';
     for (const room of rooms) {
-      const g = new Graphics();
-      g.rect(
+      roomGraphics.rect(
         room.x * tileSize + 2,
         room.y * tileSize + 2,
         room.width * tileSize - 4,
         room.height * tileSize - 4,
       );
-      g.fill({ color: 0x4d9fff, alpha: 0.04 });
-      this.container.addChild(g);
+      roomGraphics.fill({ color: 0x4d9fff, alpha: 0.04 });
     }
+    this.container.addChild(roomGraphics);
 
-    // Draw furniture
+    // Batch furniture into a single Graphics
+    const furnitureGraphics = new Graphics();
+    furnitureGraphics.label = 'furniture';
     for (const item of furniture) {
-      this.drawFurniture(item, tileSize);
+      this.drawFurniture(furnitureGraphics, item, tileSize);
     }
+    this.container.addChild(furnitureGraphics);
   }
 
-  private drawFurniture(item: FurniturePlacement, tileSize: number) {
-    const g = new Graphics();
+  private drawFurniture(g: Graphics, item: FurniturePlacement, tileSize: number) {
     const px = item.x * tileSize;
     const py = item.y * tileSize;
     const color = FURNITURE_COLORS[item.type];
@@ -77,10 +82,8 @@ export class TileMap {
 
     switch (item.type) {
       case FurnitureType.Desk:
-        // Desk: rectangular shape with screen
         g.roundRect(px + 4, py + 6, s - 8, s - 12, 2);
         g.fill(color);
-        // Monitor on desk
         g.rect(px + s / 2 - 5, py + 4, 10, 6);
         g.fill(0x4d9fff);
         break;
@@ -97,7 +100,6 @@ export class TileMap {
       case FurnitureType.ServerRack:
         g.roundRect(px + 4, py + 2, s - 8, s - 4, 2);
         g.fill(color);
-        // Blinking lights
         for (let i = 0; i < 3; i++) {
           g.circle(px + 10 + i * 5, py + s / 2, 1.5);
           g.fill(i === 1 ? 0x3ddc84 : 0x4d9fff);
@@ -106,16 +108,13 @@ export class TileMap {
       case FurnitureType.CoffeeMachine:
         g.roundRect(px + 6, py + 4, s - 12, s - 8, 3);
         g.fill(color);
-        // Steam
         g.moveTo(px + s / 2 - 3, py + 2);
         g.bezierCurveTo(px + s / 2 - 3, py - 2, px + s / 2 + 3, py, px + s / 2 + 3, py - 3);
         g.stroke({ width: 1, color: 0x888888, alpha: 0.5 });
         break;
       case FurnitureType.Plant:
-        // Pot
         g.roundRect(px + s / 2 - 5, py + s - 10, 10, 8, 2);
         g.fill(0x8b6914);
-        // Leaves
         g.circle(px + s / 2, py + s / 2 - 2, 7);
         g.fill(color);
         g.circle(px + s / 2 - 4, py + s / 2, 5);
@@ -124,7 +123,6 @@ export class TileMap {
       case FurnitureType.Bookshelf:
         g.rect(px + 2, py + 2, s - 4, s - 4);
         g.fill(color);
-        // Book spines
         for (let i = 0; i < 4; i++) {
           const bookColors = [0xff6eb4, 0x4d9fff, 0x3ddc84, 0xffb647];
           g.rect(px + 5 + i * 5, py + 4, 4, s - 10);
@@ -135,8 +133,6 @@ export class TileMap {
         g.rect(px + 4, py + 4, s - 8, s - 8);
         g.fill(color);
     }
-
-    this.container.addChild(g);
   }
 
   getRoomAt(tileX: number, tileY: number): string | null {

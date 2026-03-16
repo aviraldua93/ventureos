@@ -1,7 +1,7 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import { useVentureStore } from './store';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui';
+import { Tabs, TabsList, TabsTrigger, TabsContent, ErrorBoundary } from './components/ui';
 import { OrgChart } from './components/OrgChart';
 import { AgentListPanel } from './components/AgentListPanel';
 import { MessageStream } from './components/MessageStream';
@@ -9,9 +9,23 @@ import { TaskBoard } from './components/TaskBoard';
 import { CodeDiffView } from './components/CodeDiffView';
 import { AgentDetail } from './components/AgentDetail';
 import { DemoControls } from './components/DemoControls';
-import { VirtualOffice } from './components/VirtualOffice/VirtualOffice';
 import './App.css';
 import css from './App.module.css';
+
+const VirtualOffice = lazy(() =>
+  import('./components/VirtualOffice/VirtualOffice').then(m => ({ default: m.VirtualOffice }))
+);
+
+// Spectator mode: read-only view triggered by ?spectator=1 URL param
+const isSpectator = new URLSearchParams(window.location.search).get('spectator') === '1';
+
+// Theme management
+type ThemeMode = 'dark' | 'light' | 'midnight';
+const THEMES: { value: ThemeMode; label: string }[] = [
+  { value: 'dark', label: '🌙 Dark (Default)' },
+  { value: 'light', label: '☀️ Light' },
+  { value: 'midnight', label: '🌌 Midnight' },
+];
 
 function useResizablePanels(initL: number, initR: number, minL: number, minR: number, minC: number) {
   const [leftW, setLeftW] = useState(initL);
@@ -54,6 +68,18 @@ export default function App() {
   const { agents, tasks, messages, codeChanges, connected } = useVentureStore();
   const eventCount = agents.length + tasks.length + messages.length + codeChanges.length;
   const { leftW, rightW, gridRef, startDrag } = useResizablePanels(260, 320, 180, 200, 300);
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    return (localStorage.getItem('ventureos-theme') as ThemeMode) || 'dark';
+  });
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('ventureos-theme', theme);
+  }, [theme]);
+
+  // Generate spectator share link
+  const spectatorLink = `${window.location.origin}${window.location.pathname}?spectator=1`;
 
   return (
     <Tabs defaultValue="dashboard" className={css.app}>
@@ -64,6 +90,9 @@ export default function App() {
           <h1 className={css.headerTitle}>VentureOS</h1>
           <span className={css.headerDivider} />
           <span className={css.subtitle}>Mission Control</span>
+          {isSpectator && (
+            <span className={css.spectatorBadge} data-testid="spectator-badge">👁 Spectator</span>
+          )}
         </div>
 
         <div className={css.headerCenter}>
@@ -71,7 +100,7 @@ export default function App() {
             <TabsTrigger value="dashboard" className={css.navTrigger}>Dashboard</TabsTrigger>
             <TabsTrigger value="org" className={css.navTrigger}>Org Chart</TabsTrigger>
             <TabsTrigger value="office" className={css.navTrigger}>Virtual Office</TabsTrigger>
-            <TabsTrigger value="settings" className={css.navTrigger}>Settings</TabsTrigger>
+            {!isSpectator && <TabsTrigger value="settings" className={css.navTrigger}>Settings</TabsTrigger>}
           </TabsList>
         </div>
 
@@ -114,30 +143,83 @@ export default function App() {
         <OrgChart />
       </TabsContent>
 
-      {/* Virtual Office tab */}
+      {/* Virtual Office tab — lazy-loaded with error boundary */}
       <TabsContent value="office" className={css.tabContent}>
-        <VirtualOffice />
+        <ErrorBoundary fallback={
+          <div className={css.placeholderView}>
+            <div className={css.placeholderIcon}>⚠️</div>
+            <p className={css.placeholderTitle}>Virtual Office Error</p>
+            <p className={css.placeholderDesc}>The rendering engine encountered an error. Try refreshing the page.</p>
+          </div>
+        }>
+          <Suspense fallback={
+            <div className={css.placeholderView}>
+              <div className={css.placeholderIcon}>🏢</div>
+              <p className={css.placeholderTitle}>Loading Virtual Office…</p>
+              <p className={css.placeholderDesc}>Initializing rendering engine</p>
+            </div>
+          }>
+            <VirtualOffice />
+          </Suspense>
+        </ErrorBoundary>
       </TabsContent>
 
       {/* Settings tab */}
-      <TabsContent value="settings" className={css.tabContent}>
-        <div className={css.placeholderView}>
-          <div className={css.placeholderIcon}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
+      {!isSpectator && (
+        <TabsContent value="settings" className={css.tabContent}>
+          <div className={css.settingsView} data-testid="settings-panel">
+            <div className={css.settingsSection}>
+              <h2 className={css.settingsSectionTitle}>Appearance</h2>
+              <div className={css.settingsRow}>
+                <label className={css.settingsLabel}>Theme</label>
+                <select
+                  className={css.settingsSelect}
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value as ThemeMode)}
+                  data-testid="theme-selector"
+                >
+                  {THEMES.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={css.settingsSection}>
+              <h2 className={css.settingsSectionTitle}>Spectator Mode</h2>
+              <p className={css.settingsDesc}>Share this link to let others watch your office in read-only mode:</p>
+              <div className={css.settingsRow}>
+                <input
+                  className={css.settingsInput}
+                  readOnly
+                  value={spectatorLink}
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                  data-testid="spectator-link"
+                />
+                <button
+                  className={css.settingsBtn}
+                  onClick={() => {
+                    navigator.clipboard.writeText(spectatorLink);
+                  }}
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            <div className={css.settingsSection}>
+              <h2 className={css.settingsSectionTitle}>Office Customization</h2>
+              <p className={css.settingsDesc}>Room naming and layout customization coming in Phase 2.</p>
+            </div>
           </div>
-          <p className={css.placeholderTitle}>Settings</p>
-          <p className={css.placeholderDesc}>Configuration panel coming in Phase 2</p>
-        </div>
-      </TabsContent>
+        </TabsContent>
+      )}
 
       {/* Agent detail slide-out panel */}
       <AgentDetail />
 
-      {/* Demo controls */}
-      <DemoControls />
+      {/* Demo controls — hidden in spectator mode */}
+      {!isSpectator && <DemoControls />}
 
       {/* Status bar — VS Code style */}
       <footer className={css.statusBar} data-testid="status-bar">

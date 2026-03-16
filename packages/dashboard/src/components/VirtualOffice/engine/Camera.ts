@@ -1,5 +1,3 @@
-import { Container } from 'pixi.js';
-
 export interface CameraState {
   x: number;
   y: number;
@@ -7,7 +5,6 @@ export interface CameraState {
 }
 
 export class Camera {
-  private container: Container;
   private _x = 0;
   private _y = 0;
   private _zoom = 1;
@@ -23,8 +20,7 @@ export class Camera {
   readonly maxZoom = 3;
   private readonly lerpSpeed = 0.08;
 
-  constructor(container: Container, viewWidth: number, viewHeight: number) {
-    this.container = container;
+  constructor(_container: unknown, viewWidth: number, viewHeight: number) {
     this._viewWidth = viewWidth;
     this._viewHeight = viewHeight;
   }
@@ -48,7 +44,6 @@ export class Camera {
     const oldZoom = this._targetZoom;
     this._targetZoom = Math.max(this.minZoom, Math.min(this.maxZoom, oldZoom * (1 - delta * 0.001)));
 
-    // Zoom towards cursor
     const worldX = (screenX - this._viewWidth / 2) / oldZoom + this._x;
     const worldY = (screenY - this._viewHeight / 2) / oldZoom + this._y;
     this._targetX = worldX - (screenX - this._viewWidth / 2) / this._targetZoom;
@@ -73,7 +68,6 @@ export class Camera {
   }
 
   update(_dt: number) {
-    // Follow agent if set
     if (this._following) {
       const target = this._followTargets.get(this._following);
       if (target) {
@@ -82,14 +76,8 @@ export class Camera {
       }
     }
 
-    // Lerp towards target
     this._x += (this._targetX - this._x) * this.lerpSpeed;
     this._y += (this._targetY - this._y) * this.lerpSpeed;
     this._zoom += (this._targetZoom - this._zoom) * this.lerpSpeed;
-
-    // Apply to container
-    this.container.scale.set(this._zoom);
-    this.container.x = this._viewWidth / 2 - this._x * this._zoom;
-    this.container.y = this._viewHeight / 2 - this._y * this._zoom;
   }
 }

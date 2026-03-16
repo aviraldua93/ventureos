@@ -8,3 +8,5 @@ export { Badge } from './Badge';
 export type { BadgeProps, BadgeStatus } from './Badge';
 
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
+
+export { ErrorBoundary } from './ErrorBoundary';
