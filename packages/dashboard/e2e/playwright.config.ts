@@ -24,6 +24,18 @@ export default defineConfig({
         },
       },
     },
+    {
+      name: 'demo',
+      testMatch: 'demo-recording.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        video: { mode: 'on', size: { width: 1440, height: 900 } },
+        launchOptions: {
+          args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl'],
+        },
+      },
+    },
   ],
 
   /* Start dev server before tests when not in CI */
