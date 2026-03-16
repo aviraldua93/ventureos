@@ -101,6 +101,11 @@
     { "id": "ren-kowalski", "name": "Ren Kowalski", "role": "Dev Relations", "team": "community", "parentId": "ava-chen", "capabilities": ["devrel", "demos", "outreach"] },
     { "id": "maya-patel", "name": "Maya Patel", "role": "Content Engineer", "team": "community", "parentId": "ava-chen", "capabilities": ["content", "docs", "writing"] },
 
+    { "id": "dara-okonjo", "name": "Dara Okonjo", "role": "OSS Compliance Lead", "team": "community", "parentId": "ava-chen", "capabilities": ["license-compliance", "cla", "spdx", "oss-governance"] },
+    { "id": "liam-frost", "name": "Liam Frost", "role": "OSS Security Auditor", "team": "community", "parentId": "ava-chen", "capabilities": ["dependency-audit", "secret-scanning", "supply-chain", "sbom"] },
+    { "id": "yuki-tanabe", "name": "Yuki Tanabe", "role": "Developer Experience Engineer", "team": "community", "parentId": "ava-chen", "capabilities": ["dx", "onboarding", "example-configs", "contributor-docs"] },
+    { "id": "carmen-vega", "name": "Carmen Vega", "role": "Community Standards Engineer", "team": "community", "parentId": "ava-chen", "capabilities": ["coc", "issue-templates", "pr-templates", "governance"] },
+
     { "id": "dana-whitfield", "name": "Dana Whitfield", "role": "VP Product Management", "team": "product", "parentId": "jordan-park", "capabilities": ["delivery", "sprint-cadence", "phase-transitions", "cross-team-coordination"], "isLead": true },
     { "id": "marc-delacroix", "name": "Marc Delacroix", "role": "Sprint Lead", "team": "product", "parentId": "dana-whitfield", "capabilities": ["sprint-planning", "execution", "tracking"] },
     { "id": "leo-tanaka", "name": "Leo Tanaka", "role": "Program Manager", "team": "product", "parentId": "dana-whitfield", "capabilities": ["dependency-tracking", "timelines", "standups", "cross-team-coordination"] },

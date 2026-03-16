@@ -1,5 +1,11 @@
 # 🚀 VentureOS
 
+[![CI](https://github.com/aviraldua93/ventureos/actions/workflows/ci.yml/badge.svg)](https://github.com/aviraldua93/ventureos/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.0+-black.svg)](https://bun.sh)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 **Mission Control for AI Agent Teams**
 
 > Watch your AI agents think, talk, code, and ship — in real time.
@@ -74,6 +80,44 @@ VentureOS gives you a live war-room view of AI agents working together. Hit "Sta
 - 📝 **Code Diffs** — Watch code being written line-by-line in a Monaco-powered diff viewer. It's like pair-programming with a machine.
 - 🔍 **Agent Detail** — Click on any agent to deep-dive into their reasoning, current task, and conversation history.
 - ⏯️ **Playback Controls** — Pause, resume, speed up, or restart the demo. Watch the whole thing at 10x speed, or slow it down to study the decision-making.
+
+---
+
+## 📸 Screenshots
+
+> Captured from automated Playwright E2E tests running against the live dashboard.
+
+### Dashboard Overview
+The main dashboard with message stream, code diffs, task board, and live event counters.
+
+![Dashboard Overview](docs/screenshots/dashboard-overview.png)
+
+### Org Chart
+Interactive org chart showing the full agent hierarchy with live status indicators.
+
+![Org Chart](docs/screenshots/org-chart.png)
+
+### Virtual Office
+Pixel-art virtual office where agents move between rooms in real-time.
+
+![Virtual Office](docs/screenshots/virtual-office.png)
+
+### Thronglet Nursery
+AI pet nursery — raise and evolve digital creatures alongside your agent team.
+
+![Thronglet](docs/screenshots/thronglet.png)
+
+### Four-Tab Navigation
+All four tabs — Dashboard, Org Chart, Virtual Office, and Thronglet — accessible from the top nav.
+
+![Four Tabs](docs/screenshots/four-tabs.png)
+
+### Full Demo Walkthrough
+End-to-end demo recording showing the complete dashboard experience.
+
+![Demo Walkthrough](docs/screenshots/demo-walkthrough.png)
+
+> 🎬 **Video demo:** Run `bun run test:e2e` to generate a full video walkthrough in `packages/dashboard/test-results/`. Playwright records `.webm` videos of every test run — the `demo-recording` test captures a complete dashboard walkthrough.
 
 ---
 
@@ -268,6 +312,12 @@ bun run type-check
 ```
 
 ---
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Part of aviraldua93 Ventures
 

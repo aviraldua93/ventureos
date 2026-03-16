@@ -15,14 +15,24 @@ dist/
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
+._*
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
 
 # Bun
 bun.lockb
@@ -34,3 +44,14 @@ events.jsonl
 test-results/
 playwright-report/
 e2e-results/
+
+# User config (keep example, ignore user's own)
+ventureos.config.json
+
+# Coverage
+coverage/
+*.lcov
+
+# Misc
+*.tgz
+.cache/
