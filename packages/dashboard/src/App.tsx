@@ -39,10 +39,10 @@ export default function App() {
 
         <TabsContent value="dashboard" style={{ flex: 1, overflow: 'hidden', padding: 0 }}>
           <div className={css.dashboardGrid}>
-            <aside className={css.panelLeft}>
+            <aside className={css.panelLeft} data-testid="panel-left">
               <OrgChart />
             </aside>
-            <section className={css.panelCenter}>
+            <section className={css.panelCenter} data-testid="panel-center">
               <MessageStream />
               <TaskBoard />
             </section>
@@ -74,7 +74,7 @@ export default function App() {
       <DemoControls />
 
       {/* Status bar */}
-      <footer className={css.statusBar}>
+      <footer className={css.statusBar} data-testid="status-bar">
         <span>Agents: {agents.length}</span>
         <span>Tasks: {tasks.length}</span>
         <span>Messages: {messages.length}</span>

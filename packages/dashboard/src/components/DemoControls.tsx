@@ -87,7 +87,7 @@ export function DemoControls() {
         </motion.div>
       )}
 
-      <div className={css.controls}>
+      <div className={css.controls} data-testid="demo-controls">
         <div className={css.left}>
           <motion.div whileTap={{ scale: 0.95 }}>
             <Button variant="primary" size="sm" onClick={handlePlayPause}>

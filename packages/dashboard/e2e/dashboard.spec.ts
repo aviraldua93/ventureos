@@ -15,25 +15,25 @@ test.describe('VentureOS Dashboard — Smoke Tests', () => {
   test('demo controls are visible', async ({ page }) => {
     await page.goto('/');
     // DemoControls renders a bottom bar with play/pause/reset
-    const demoBar = page.locator('.demo-controls');
+    const demoBar = page.locator('[data-testid="demo-controls"]');
     await expect(demoBar).toBeVisible();
   });
 
   test('org chart panel renders', async ({ page }) => {
     await page.goto('/');
-    const orgPanel = page.locator('.panel-left');
+    const orgPanel = page.locator('[data-testid="panel-left"]');
     await expect(orgPanel).toBeVisible();
   });
 
   test('message stream panel renders', async ({ page }) => {
     await page.goto('/');
-    const messageStream = page.locator('.panel-center');
+    const messageStream = page.locator('[data-testid="panel-center"]');
     await expect(messageStream).toBeVisible();
   });
 
   test('status bar shows agent count', async ({ page }) => {
     await page.goto('/');
-    const statusBar = page.locator('.status-bar');
+    const statusBar = page.locator('[data-testid="status-bar"]');
     await expect(statusBar).toContainText('Agents:');
     await expect(statusBar).toContainText('Tasks:');
   });
