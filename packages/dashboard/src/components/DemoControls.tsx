@@ -21,7 +21,7 @@ export function DemoControls() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(\`\${API}/api/demo/status\`);
+      const res = await fetch(`${API}/api/demo/status`);
       if (res.ok) setStatus(await res.json());
     } catch {
       // server unreachable
@@ -36,7 +36,7 @@ export function DemoControls() {
 
   const post = async (apiPath: string, body?: object) => {
     try {
-      await fetch(\`\${API}\${apiPath}\`, {
+      await fetch(`${API}${apiPath}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined,
@@ -93,7 +93,7 @@ export function DemoControls() {
           <div className="demo-progress-track">
             <div
               className="demo-progress-fill"
-              style={{ width: \`\${status.progress.pct}%\` }}
+              style={{ width: `${status.progress.pct}%` }}
             />
           </div>
           <span className="demo-progress-text">
@@ -105,7 +105,7 @@ export function DemoControls() {
           {SPEEDS.map((s) => (
             <button
               key={s}
-              className={\`demo-btn demo-btn-speed \${status.speed === s ? 'active' : ''}\`}
+              className={`demo-btn demo-btn-speed ${status.speed === s ? 'active' : ''}`}
               onClick={() => handleSpeed(s)}
             >
               {s}x
@@ -114,7 +114,7 @@ export function DemoControls() {
         </div>
       </div>
 
-      <style>{\`
+      <style>{`
         .demo-banner {
           position: fixed;
           top: 0;
@@ -199,7 +199,7 @@ export function DemoControls() {
           color: #8b949e;
           white-space: nowrap;
         }
-      \`}</style>
+      `}</style>
     </>
   );
 }

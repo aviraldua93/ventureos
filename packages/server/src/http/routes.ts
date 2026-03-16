@@ -2,7 +2,7 @@ import type { Projections } from '../events/projections';
 import type { DemoEngine } from '../demo/engine';
 
 export function createRouter(projections: Projections, demo?: DemoEngine) {
-  return function handleRequest(req: Request): Response | null {
+  return function handleRequest(req: Request): Response | Promise<Response> | null {
     const url = new URL(req.url);
 
     if (url.pathname === '/api/health') {

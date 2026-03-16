@@ -5,6 +5,7 @@ import { MessageStream } from './components/MessageStream';
 import { TaskBoard } from './components/TaskBoard';
 import { CodeDiffView } from './components/CodeDiffView';
 import { AgentDetail } from './components/AgentDetail';
+import { DemoControls } from './components/DemoControls';
 import './App.css';
 
 export default function App() {
@@ -44,6 +45,9 @@ export default function App() {
 
       {/* Agent detail slide-out panel */}
       <AgentDetail />
+
+      {/* Demo controls bottom bar */}
+      <DemoControls />
 
       {/* Status bar */}
       <footer className="status-bar">
