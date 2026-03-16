@@ -63,7 +63,7 @@ export class SpriteManager {
 
     // Name label
     const label = new Text({
-      text: name.split(' ')[0] ?? name,
+      text: (name ?? '').split(' ')[0] || name || '?',
       style: new TextStyle({
         fontSize: 8,
         fill: 0xe8edf4,

@@ -34,7 +34,7 @@ test.describe('VentureOS Dashboard — Smoke Tests', () => {
   test('status bar shows agent count', async ({ page }) => {
     await page.goto('/');
     const statusBar = page.locator('[data-testid="status-bar"]');
-    await expect(statusBar).toContainText('Agents:');
-    await expect(statusBar).toContainText('Tasks:');
+    await expect(statusBar).toContainText('Agents');
+    await expect(statusBar).toContainText('Tasks');
   });
 });

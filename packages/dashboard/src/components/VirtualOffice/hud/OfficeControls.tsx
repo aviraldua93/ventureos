@@ -45,7 +45,7 @@ export function OfficeControls({ engine, agents }: OfficeControlsProps) {
       <select className={css.followSelect} onChange={handleFollow} defaultValue="" title="Follow Agent">
         <option value="">👁 Free</option>
         {agents.map(a => (
-          <option key={a.id} value={a.id}>{a.name.split(' ')[0]}</option>
+          <option key={a.id} value={a.id}>{(a.name ?? a.id).split(' ')[0]}</option>
         ))}
       </select>
     </div>
