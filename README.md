@@ -1,3 +1,5 @@
+<p align="center"><img src="hero.svg" alt="VentureOS Hero" width="800" /></p>
+
 # 🚀 VentureOS
 
 [![CI](https://github.com/aviraldua93/ventureos/actions/workflows/ci.yml/badge.svg)](https://github.com/aviraldua93/ventureos/actions/workflows/ci.yml)
