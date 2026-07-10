@@ -8,11 +8,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black.svg)](https://bun.sh)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**Mission Control for AI Agent Teams**
-
-> Watch your AI agents think, talk, code, and ship — in real time.
-
-VentureOS is an open-source, real-time dashboard for observing AI agent teams. Connect your agents, and watch them collaborate through a live org chart, message stream, code diff viewer, and task board.
+**Mission Control for AI Agent Teams** — a real-time Bun/React dashboard for observing AI agent collaboration through a live org chart, message stream, code diff viewer, and task board.
 
 > **📦 Current status:** VentureOS ships with a built-in demo scenario — 98 events simulating a team of 5 AI agents building [ArchitectAI](https://github.com/aviraldua93/architect-ai). It's the fastest way to see what the platform does. In the future, real agents will connect via the MCP server and WebSocket. The API is already live — you can POST your own events to `/api/events` right now.
 
@@ -27,16 +23,21 @@ Get VentureOS running on your machine in under 2 minutes.
 - [Bun](https://bun.sh) v1.0+ (our runtime & package manager)
 - Node.js v18+ (for Vite dev server)
 
-### Install & Run
+### Quickstart / Install
 
 ```bash
 git clone https://github.com/aviraldua93/ventureos.git
 cd ventureos
 bun install
+```
+
+### Run
+
+```bash
 bun run dev
 ```
 
-That's it. `bun run dev` starts both the backend server and the dashboard in one terminal (with hot reload).
+`bun run dev` starts both the backend server and the dashboard in one terminal (with hot reload).
 
 > **Backend:** You should see `VentureOS v0.1.0 running on http://localhost:3000`
 > **Dashboard:** You should see `VITE v6.x.x  ready in Xms` → `Local: http://localhost:5173`
@@ -266,6 +267,19 @@ bun run test
 
 # Production build
 bun run build
+```
+
+### Testing
+
+```bash
+# Type-check all workspaces
+bun run type-check
+
+# Run unit tests
+bun run test
+
+# Run browser E2E tests (starts the local dev server when needed)
+bun run test:e2e
 ```
 
 ---
