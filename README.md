@@ -10,7 +10,7 @@
 
 **Mission Control for AI Agent Teams** — a real-time Bun/React dashboard for observing AI agent collaboration through a live org chart, message stream, code diff viewer, and task board.
 
-> **📦 Current status:** VentureOS ships with a built-in demo scenario — 98 events simulating a team of 5 AI agents building [ArchitectAI](https://github.com/aviraldua93/architect-ai). It's the fastest way to see what the platform does. In the future, real agents will connect via the MCP server and WebSocket. The API is already live — you can POST your own events to `/api/events` right now.
+> **📦 Current status:** VentureOS ships with a built-in demo scenario — 99 events simulating a team of 5 AI agents building [ArchitectAI](https://github.com/aviraldua93/architect-ai). It's the fastest way to see what the platform does. In the future, real agents will connect via the MCP server and WebSocket. The API is already live — you can POST your own events to `/api/events` right now.
 
 ---
 
@@ -46,7 +46,7 @@ bun run dev
 
 👉 **http://localhost:5173**
 
-Click **"Start Demo"** to launch the demo. This replays a pre-recorded scenario of 5 AI agents building ArchitectAI — you'll see them appear on the org chart, chat in the message stream, pick up tasks, and ship code changes. It runs ~98 events over about 30 seconds at default speed.
+Click **"Start Demo"** to launch the demo. This replays a pre-recorded scenario of 5 AI agents building ArchitectAI — you'll see them appear on the org chart, chat in the message stream, pick up tasks, and ship code changes. It runs 99 events over about 5 minutes at default speed — bump the speed up to 10× to watch the whole thing in ~30 seconds.
 
 <details>
 <summary><strong>🔧 Manual Setup (two terminals)</strong></summary>
